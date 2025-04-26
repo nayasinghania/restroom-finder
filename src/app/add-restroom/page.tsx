@@ -37,6 +37,7 @@ export default function AddRestroomPage() {
       // In a real app, you would redirect to the new restroom page
     }, 1500)
   }
+  
 
   return (
     <main className="container mx-auto px-4 py-6">

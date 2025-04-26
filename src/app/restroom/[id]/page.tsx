@@ -9,35 +9,34 @@ import AIAnalysisCard from "@/components/ai-analysis-card"
 import AddReviewForm from "@/components/add-review-form"
 import MenstrualProductsSection from "@/components/menstrual-products-section"
 
-interface RestroomPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default function RestroomPage({ params }: RestroomPageProps) {
-  const id = Number.parseInt(params.id)
+export default async function RestroomPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const restroom_id = Number.parseInt(id)
 
   // This would come from your database in a real app
   const restroom = {
     id,
-    name: id === 1 ? "Central Park Restroom" : id === 2 ? "Mall Food Court Restroom" : "City Library Restroom",
-    address: `${100 + id} Main Street, New York, NY`,
-    distance: `${(0.2 * id).toFixed(1)} mi`,
-    rating: 4 + (id % 2) * 0.5,
-    reviewCount: 10 * id,
+    name: restroom_id === 1 ? "Central Park Restroom" : restroom_id === 2 ? "Mall Food Court Restroom" : "City Library Restroom",
+    address: `${100 + restroom_id} Main Street, New York, NY`,
+    distance: `${(0.2 * restroom_id).toFixed(1)} mi`,
+    rating: 4 + (restroom_id % 2) * 0.5,
+    reviewCount: 10 * restroom_id,
     categories: {
-      cleanliness: 4 + (id % 3) * 0.5,
-      privacy: 3.5 + (id % 2) * 0.5,
-      accessibility: id % 2 === 0 ? 5 : 4,
+      cleanliness: 4 + (restroom_id % 3) * 0.5,
+      privacy: 3.5 + (restroom_id % 2) * 0.5,
+      accessibility: restroom_id % 2 === 0 ? 5 : 4,
     },
-    features: ["Gender Neutral", id % 2 === 0 ? "Baby Changing" : "Handicap Accessible", "Free"],
+    features: ["Gender Neutral", restroom_id % 2 === 0 ? "Baby Changing" : "Handicap Accessible", "Free"],
     menstrualProducts: {
-      available: id % 2 === 0,
-      type: id % 2 === 0 ? "Free dispensers" : "Coin-operated",
-      lastRestocked: id % 2 === 0 ? "2 days ago" : "1 week ago",
+      available: restroom_id % 2 === 0,
+      type: restroom_id % 2 === 0 ? "Free dispensers" : "Coin-operated",
+      lastRestocked: restroom_id % 2 === 0 ? "2 days ago" : "1 week ago",
       images:
-        id % 2 === 0
+        restroom_id % 2 === 0
           ? [
               `/placeholder.svg?height=200&width=300&text=Menstrual+Product+Dispenser+1`,
               `/placeholder.svg?height=200&width=300&text=Menstrual+Product+Dispenser+2`,
@@ -46,9 +45,9 @@ export default function RestroomPage({ params }: RestroomPageProps) {
     },
     hours: "7:00 AM - 10:00 PM",
     images: [
-      `/placeholder.svg?height=300&width=400&text=Restroom+${id}+Image+1`,
-      `/placeholder.svg?height=300&width=400&text=Restroom+${id}+Image+2`,
-      `/placeholder.svg?height=300&width=400&text=Restroom+${id}+Image+3`,
+      `/placeholder.svg?height=300&width=400&text=Restroom+${restroom_id}+Image+1`,
+      `/placeholder.svg?height=300&width=400&text=Restroom+${restroom_id}+Image+2`,
+      `/placeholder.svg?height=300&width=400&text=Restroom+${restroom_id}+Image+3`,
     ],
     reviews: [
       {
@@ -140,10 +139,10 @@ export default function RestroomPage({ params }: RestroomPageProps) {
             <MenstrualProductsSection
               data={{
                 ...restroom.menstrualProducts,
-                status: id % 3 === 0 ? "well-stocked" : id % 3 === 1 ? "low" : "empty",
-                reportedIssues: id % 2 === 0 ? ["Dispenser jammed", "Needs refill"] : [],
+                status: restroom_id % 3 === 0 ? "well-stocked" : restroom_id % 3 === 1 ? "low" : "empty",
+                reportedIssues: restroom_id % 2 === 0 ? ["Dispenser jammed", "Needs refill"] : [],
               }}
-              restroomId={id}
+              restroomId={restroom_id}
             />
           )}
 
@@ -188,7 +187,7 @@ export default function RestroomPage({ params }: RestroomPageProps) {
                 </Card>
               ))}
 
-              <AddReviewForm restroomId={id} />
+              <AddReviewForm restroomId={restroom_id} />
             </TabsContent>
 
             <TabsContent value="ratings" className="mt-4">
