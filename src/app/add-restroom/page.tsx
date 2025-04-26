@@ -133,7 +133,7 @@ export default function AddRestroomPage() {
             </CardContent>
           </Card>
 
-          <Card className={`${document.getElementById("menstrual-products")?.checked ? "" : "opacity-50"}`}>
+          <Card>
             <CardHeader>
               <CardTitle>Menstrual Products Information</CardTitle>
               <CardDescription>Provide details about menstrual product availability</CardDescription>
