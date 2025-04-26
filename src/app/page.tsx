@@ -1,32 +1,13 @@
-import Link from "next/link";
-import { Search, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import RestroomCard from "@/components/restroom-card";
 import MapView from "@/components/map-view";
 import MenstrualProductFilter from "@/components/menstrual-product-filter";
+import Header from "@/components/header";
 
 export default function HomePage() {
   return (
     <main className="container mx-auto px-4 py-6">
-      <header className="flex flex-col sm:flex-row items-center justify-between mb-8">
-        <div className="flex items-center mb-4 sm:mb-0">
-          <h1 className="text-2xl font-bold mr-2">RestroomFinder</h1>
-          <MapPin className="h-5 w-5 text-teal-500" />
-        </div>
-        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search restrooms..." className="pl-8" />
-          </div>
-          <Link href="/add-restroom" className="w-full sm:w-auto">
-            <Button className="bg-teal-600 hover:bg-teal-700 w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Restroom
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-1/3 space-y-4">
