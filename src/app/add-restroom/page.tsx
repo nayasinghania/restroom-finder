@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -232,11 +233,13 @@ export default function AddRestroomPage() {
                   <div className="grid grid-cols-3 gap-2 mt-2">
                     {images.map((image, index) => (
                       <div key={index} className="relative h-24 rounded-md overflow-hidden">
-                        {/* In a real app, you would use next/image here */}
-                        <img
+                        
+                        <Image
                           src={image || "/placeholder.svg"}
                           alt={`Uploaded image ${index + 1}`}
                           className="w-full h-full object-cover"
+                          layout="fill"
+                          objectFit="cover"
                         />
                       </div>
                     ))}
