@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Filter } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,15 +10,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 export default function MenstrualProductFilter() {
-  const [showOnlyWithProducts, setShowOnlyWithProducts] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [showOnlyWithProducts, setShowOnlyWithProducts] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const handleStatusChange = (status: string) => {
-    setStatusFilter((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]))
-  }
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
+    );
+  };
 
   return (
     <DropdownMenu>
@@ -64,7 +68,10 @@ export default function MenstrualProductFilter() {
             className="w-full bg-pink-500 hover:bg-pink-600"
             onClick={() => {
               // Apply filters
-              console.log("Applying filters:", { showOnlyWithProducts, statusFilter })
+              console.log("Applying filters:", {
+                showOnlyWithProducts,
+                statusFilter,
+              });
             }}
           >
             Apply Filters
@@ -72,5 +79,5 @@ export default function MenstrualProductFilter() {
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

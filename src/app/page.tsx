@@ -1,10 +1,10 @@
-import Link from "next/link"
-import { Search, MapPin, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import RestroomCard from "@/components/restroom-card"
-import MapView from "@/components/map-view"
-import MenstrualProductFilter from "@/components/menstrual-product-filter"
+import Link from "next/link";
+import { Search, MapPin, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import RestroomCard from "@/components/restroom-card";
+import MapView from "@/components/map-view";
+import MenstrualProductFilter from "@/components/menstrual-product-filter";
 
 export default function HomePage() {
   return (
@@ -57,5 +57,5 @@ export default function HomePage() {
         </div>
       </div>
     </main>
-  )
+  );
 }

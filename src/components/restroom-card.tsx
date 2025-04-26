@@ -1,11 +1,11 @@
-import Link from "next/link"
-import Image from "next/image"
-import { Star, MapPin, ThumbsUp } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link";
+import Image from "next/image";
+import { Star, MapPin, ThumbsUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface RestroomCardProps {
-  id: number
+  id: number;
 }
 
 export default function RestroomCard({ id }: RestroomCardProps) {
@@ -28,14 +28,19 @@ export default function RestroomCard({ id }: RestroomCardProps) {
       id % 3 === 0 ? "Menstrual Products" : "",
     ],
     image: `/placeholder.svg?height=150&width=250&text=Restroom+${id}`,
-  }
+  };
 
   return (
     <Link href={`/restroom/${id}`}>
       <Card className="overflow-hidden hover:shadow-md transition-shadow">
         <div className="flex flex-col sm:flex-row">
           <div className="relative h-40 sm:h-auto sm:w-1/3">
-            <Image src={restroom.image || "/placeholder.svg"} alt={restroom.name} fill className="object-cover" />
+            <Image
+              src={restroom.image || "/placeholder.svg"}
+              alt={restroom.name}
+              fill
+              className="object-cover"
+            />
           </div>
           <CardContent className="flex-1 p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
@@ -43,7 +48,9 @@ export default function RestroomCard({ id }: RestroomCardProps) {
               <div className="flex items-center mt-1 sm:mt-0">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                 <span className="font-medium">{restroom.rating}</span>
-                <span className="text-muted-foreground text-sm ml-1">({restroom.reviewCount})</span>
+                <span className="text-muted-foreground text-sm ml-1">
+                  ({restroom.reviewCount})
+                </span>
               </div>
             </div>
 
@@ -99,5 +106,5 @@ export default function RestroomCard({ id }: RestroomCardProps) {
         </div>
       </Card>
     </Link>
-  )
+  );
 }

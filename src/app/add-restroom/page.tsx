@@ -1,47 +1,57 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Image from "next/image"
+import type React from "react";
+import Image from "next/image";
 
-import { useState } from "react"
-import Link from "next/link"
-import { ArrowLeft, MapPin, Upload, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, MapPin, Upload, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AddRestroomPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [images, setImages] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       // In a real app, you would upload these to your server/cloud storage
       // For demo purposes, we'll just create object URLs
-      const newImages = Array.from(e.target.files).map((file) => URL.createObjectURL(file))
-      setImages([...images, ...newImages])
+      const newImages = Array.from(e.target.files).map((file) =>
+        URL.createObjectURL(file),
+      );
+      setImages([...images, ...newImages]);
     }
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     // Simulate API call
     setTimeout(() => {
-      setIsSubmitting(false)
-      alert("Restroom added successfully! (This is a demo)")
+      setIsSubmitting(false);
+      alert("Restroom added successfully! (This is a demo)");
       // In a real app, you would redirect to the new restroom page
-    }, 1500)
-  }
-  
+    }, 1500);
+  };
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground mb-4">
+      <Link
+        href="/"
+        className="flex items-center text-muted-foreground hover:text-foreground mb-4"
+      >
         <ArrowLeft className="h-4 w-4 mr-1" />
         Back to search
       </Link>
@@ -53,18 +63,29 @@ export default function AddRestroomPage() {
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Provide details about the restroom location</CardDescription>
+              <CardDescription>
+                Provide details about the restroom location
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="name">Restroom Name</Label>
-                <Input id="name" placeholder="e.g. Central Park Public Restroom" required />
+                <Input
+                  id="name"
+                  placeholder="e.g. Central Park Public Restroom"
+                  required
+                />
               </div>
 
               <div>
                 <Label htmlFor="address">Address</Label>
                 <div className="flex">
-                  <Input id="address" placeholder="Full address" required className="flex-1" />
+                  <Input
+                    id="address"
+                    placeholder="Full address"
+                    required
+                    className="flex-1"
+                  />
                   <Button type="button" variant="outline" className="ml-2">
                     <MapPin className="h-4 w-4 mr-2" />
                     Use Current
@@ -79,7 +100,10 @@ export default function AddRestroomPage() {
                 </div>
                 <div>
                   <Label htmlFor="type">Restroom Type</Label>
-                  <select id="type" className="w-full h-10 rounded-md border border-input bg-background px-3 py-2">
+                  <select
+                    id="type"
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
+                  >
                     <option value="">Select type</option>
                     <option value="public">Public</option>
                     <option value="business">Business</option>
@@ -104,7 +128,9 @@ export default function AddRestroomPage() {
           <Card>
             <CardHeader>
               <CardTitle>Features</CardTitle>
-              <CardDescription>Select all features that apply to this restroom</CardDescription>
+              <CardDescription>
+                Select all features that apply to this restroom
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -125,7 +151,10 @@ export default function AddRestroomPage() {
                 ].map((feature) => (
                   <div key={feature} className="flex items-center space-x-2">
                     <Checkbox id={feature.replace(/\s+/g, "-").toLowerCase()} />
-                    <Label htmlFor={feature.replace(/\s+/g, "-").toLowerCase()} className="text-sm font-normal">
+                    <Label
+                      htmlFor={feature.replace(/\s+/g, "-").toLowerCase()}
+                      className="text-sm font-normal"
+                    >
                       {feature}
                     </Label>
                   </div>
@@ -137,7 +166,9 @@ export default function AddRestroomPage() {
           <Card>
             <CardHeader>
               <CardTitle>Menstrual Products Information</CardTitle>
-              <CardDescription>Provide details about menstrual product availability</CardDescription>
+              <CardDescription>
+                Provide details about menstrual product availability
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start space-x-2">
@@ -185,7 +216,13 @@ export default function AddRestroomPage() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Upload photos of the menstrual product dispensers
                   </p>
-                  <Input type="file" accept="image/*" multiple className="hidden" id="dispenser-image-upload" />
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    id="dispenser-image-upload"
+                  />
                   <Label htmlFor="dispenser-image-upload">
                     <Button type="button" variant="outline" size="sm">
                       Select Images
@@ -208,13 +245,17 @@ export default function AddRestroomPage() {
           <Card>
             <CardHeader>
               <CardTitle>Photos</CardTitle>
-              <CardDescription>Upload photos of the restroom to help others</CardDescription>
+              <CardDescription>
+                Upload photos of the restroom to help others
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4">
                 <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">Drag and drop images here or click to browse</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Drag and drop images here or click to browse
+                  </p>
                   <Input
                     type="file"
                     accept="image/*"
@@ -233,8 +274,10 @@ export default function AddRestroomPage() {
                 {images.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mt-2">
                     {images.map((image, index) => (
-                      <div key={index} className="relative h-24 rounded-md overflow-hidden">
-                        
+                      <div
+                        key={index}
+                        className="relative h-24 rounded-md overflow-hidden"
+                      >
                         <Image
                           src={image || "/placeholder.svg"}
                           alt={`Uploaded image ${index + 1}`}
@@ -256,7 +299,9 @@ export default function AddRestroomPage() {
                 <Sparkles className="h-5 w-5 text-teal-500 mr-2" />
                 <CardTitle>AI-Enhanced Features</CardTitle>
               </div>
-              <CardDescription>Our AI will analyze your photos and reviews to extract features</CardDescription>
+              <CardDescription>
+                Our AI will analyze your photos and reviews to extract features
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -267,8 +312,9 @@ export default function AddRestroomPage() {
                       Enable AI Image Analysis
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Our computer vision system will detect features like cleanliness, accessibility features, and
-                      amenities from your photos.
+                      Our computer vision system will detect features like
+                      cleanliness, accessibility features, and amenities from
+                      your photos.
                     </p>
                   </div>
                 </div>
@@ -280,7 +326,8 @@ export default function AddRestroomPage() {
                       Enable AI Review Analysis
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Our NLP system will analyze reviews to extract pros, cons, and key features mentioned by users.
+                      Our NLP system will analyze reviews to extract pros, cons,
+                      and key features mentioned by users.
                     </p>
                   </div>
                 </div>
@@ -292,12 +339,16 @@ export default function AddRestroomPage() {
             <Button type="button" variant="outline">
               Cancel
             </Button>
-            <Button type="submit" className="bg-teal-600 hover:bg-teal-700" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="bg-teal-600 hover:bg-teal-700"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Submitting..." : "Add Restroom"}
             </Button>
           </div>
         </form>
       </div>
     </main>
-  )
+  );
 }

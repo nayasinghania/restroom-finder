@@ -1,12 +1,12 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Sparkles, ThumbsUp, ThumbsDown, Camera } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Sparkles, ThumbsUp, ThumbsDown, Camera } from "lucide-react";
 
 interface AIAnalysisProps {
   analysis: {
-    pros: string[]
-    cons: string[]
-    imageFeatures: string[]
-  }
+    pros: string[];
+    cons: string[];
+    imageFeatures: string[];
+  };
 }
 
 export default function AIAnalysisCard({ analysis }: AIAnalysisProps) {
@@ -19,7 +19,8 @@ export default function AIAnalysisCard({ analysis }: AIAnalysisProps) {
         </div>
 
         <div className="text-sm text-muted-foreground mb-4">
-          Our AI has analyzed reviews and images to extract key insights about this restroom.
+          Our AI has analyzed reviews and images to extract key insights about
+          this restroom.
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -55,7 +56,10 @@ export default function AIAnalysisCard({ analysis }: AIAnalysisProps) {
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
             {analysis.imageFeatures.map((feature, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
+              <span
+                key={index}
+                className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs"
+              >
                 {feature}
               </span>
             ))}
@@ -63,5 +67,5 @@ export default function AIAnalysisCard({ analysis }: AIAnalysisProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
