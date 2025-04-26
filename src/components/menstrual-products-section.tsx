@@ -16,7 +16,7 @@ interface MenstrualProductsProps {
   restroomId: number
 }
 
-export default function MenstrualProductsSection({ data, restroomId }: MenstrualProductsProps) {
+export default function MenstrualProductsSection({ data }: MenstrualProductsProps) {
   if (!data) return null
 
   return (
