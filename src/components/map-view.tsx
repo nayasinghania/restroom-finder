@@ -1,125 +1,107 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { MapPin } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+//import { MapPin } from "lucide-react";
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+
+
+async function getUserLocation() {
+  return new Promise<GeolocationPosition>((resolve, reject) => {
+    
+
+    const options = {
+      enableHighAccuracy: true, // Try to get the best possible results
+      timeout: 10000,         // Maximum time (in milliseconds) to wait for a location
+      maximumAge: 0          // Maximum age (in milliseconds) of a cached position allowed
+                             // 0 means don't use a cached position
+    };
+
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by this browser."));
+    } else {
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      console.log("Getting Location!");
+    }
+  });
+}
+
+
 
 export default function MapView() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [center, setCenter] = useState({lat: 37.334665328, lng: -121.875329832}); // Default to SJSU
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  // Mock data for restroom locations
-  const locations = [
-    { x: 150, y: 100, rating: 4.5, name: "Central Park Restroom" },
-    { x: 300, y: 200, rating: 4.0, name: "Mall Food Court Restroom" },
-    { x: 450, y: 150, rating: 3.5, name: "City Library Restroom" },
-    { x: 200, y: 300, rating: 5.0, name: "Train Station Restroom" },
-    { x: 400, y: 350, rating: 4.2, name: "Beach Pavilion Restroom" },
-  ];
+  const { isLoaded } = useJsApiLoader({
+    id: 'annular-primer-458021-q3',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GMAPS_API_KEY || '', 
+  });
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const onLoad = useCallback(function callback(map: google.maps.Map | null) {
+    // This is just an example of getting and using the map instance!!! don't just blindly copy!
+    const bounds = new window.google.maps.LatLngBounds(center);
+    if (map) {
+      map.fitBounds(bounds);
+      map.panTo(center);
+      setMap(map);
+    }
+  }, [center]);
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
-    // Set canvas dimensions to match container
-    const resizeCanvas = () => {
-      const parent = canvas.parentElement;
-      if (parent) {
-        canvas.width = parent.clientWidth;
-        canvas.height = parent.clientHeight;
-        drawMap();
-      }
-    };
-
-    // Draw the map
-    const drawMap = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw background
-      ctx.fillStyle = "#f0f4f8";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw some roads
-      ctx.strokeStyle = "#d1d5db";
-      ctx.lineWidth = 8;
-
-      // Horizontal roads
-      for (let y = 100; y < canvas.height; y += 200) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Vertical roads
-      for (let x = 100; x < canvas.width; x += 200) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      // Draw blocks
-      ctx.fillStyle = "#e5e7eb";
-      for (let x = 0; x < canvas.width; x += 200) {
-        for (let y = 0; y < canvas.height; y += 200) {
-          ctx.fillRect(x + 10, y + 10, 180, 180);
-        }
-      }
-
-      // Draw location pins
-      locations.forEach((loc) => {
-        const x = (loc.x / 500) * canvas.width;
-        const y = (loc.y / 400) * canvas.height;
-
-        // Pin shadow
-        ctx.beginPath();
-        ctx.arc(x, y, 12, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-        ctx.fill();
-
-        // Pin background
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "#14b8a6";
-        ctx.fill();
-
-        // Rating text
-        ctx.fillStyle = "white";
-        ctx.font = "bold 10px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(loc.rating.toString(), x, y);
-      });
-    };
-
-    // Initial setup
-    resizeCanvas();
-
-    // Handle window resize
-    window.addEventListener("resize", resizeCanvas);
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
+  const onUnmount = useCallback(function callback(map: google.maps.Map): void {
+    setMap(null);
   }, []);
 
-  return (
-    <div className="relative h-full w-full">
-      <canvas ref={canvasRef} className="w-full h-full" />
-      <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-md">
-        <div className="flex items-center mb-2">
-          <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center mr-2">
-            <MapPin className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-sm font-medium">Your Location</span>
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Click on a pin to view restroom details
-        </div>
-      </div>
-    </div>
-  );
+  // const onCenterChange = useCallback(function callback(): void {
+  //   const bounds = new window.google.maps.LatLngBounds(center);
+  //   if (map) {
+  //     map.fitBounds(bounds);
+  //     setMap(map);
+  //     map.setZoom(10);
+  //   }
+  // }, [center, map]);
+
+  
+  useEffect(() => {
+    if (map) {
+       map.panTo(center);
+       map.setZoom(10);
+    }
+  }, [center, map]);
+  //const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    async function fetchLocation() {
+      try {
+        const position = await getUserLocation();
+        setCenter({lat: position.coords.latitude, lng: position.coords.longitude});
+      } catch (error) {
+        console.error('Error getting location:', error);
+      }
+    }
+    fetchLocation();
+  }, []);
+
+  // Map CSS
+  const containerStyle = {
+    width: '100%',
+    height: '100%',
+  };
+
+
+  return isLoaded ? (
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={10}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+      //onCenterChanged={onCenterChange}
+    >
+      {/* Child components, such as markers, info windows, etc. */}
+      <></>
+    </GoogleMap>
+  ) : (
+    <></>
+  )
 }
+
