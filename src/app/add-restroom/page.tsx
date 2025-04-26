@@ -37,6 +37,7 @@ export default function AddRestroomPage() {
       // In a real app, you would redirect to the new restroom page
     }, 1500)
   }
+  
 
   return (
     <main className="container mx-auto px-4 py-6">
@@ -133,7 +134,7 @@ export default function AddRestroomPage() {
             </CardContent>
           </Card>
 
-          <Card className={`${document.getElementById("menstrual-products")?.checked ? "" : "opacity-50"}`}>
+          <Card>
             <CardHeader>
               <CardTitle>Menstrual Products Information</CardTitle>
               <CardDescription>Provide details about menstrual product availability</CardDescription>
