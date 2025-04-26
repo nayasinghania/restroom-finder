@@ -1,37 +1,37 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Star, Camera } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { Star, Camera } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 interface AddReviewFormProps {
-  restroomId: number
+  restroomId: number;
 }
 
 export default function AddReviewForm({ restroomId }: AddReviewFormProps) {
-  const [rating, setRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
-  const [reviewText, setReviewText] = useState("")
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // In a real app, you would submit this data to your backend
     console.log({
       restroomId,
       rating,
       reviewText,
-    })
+    });
 
     // Reset form
-    setRating(0)
-    setReviewText("")
-    alert("Review submitted! (This is a demo)")
-  }
+    setRating(0);
+    setReviewText("");
+    alert("Review submitted! (This is a demo)");
+  };
 
   return (
     <Card>
@@ -49,7 +49,9 @@ export default function AddReviewForm({ restroomId }: AddReviewFormProps) {
                 <Star
                   key={star}
                   className={`h-8 w-8 cursor-pointer ${
-                    (hoverRating || rating) >= star ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                    (hoverRating || rating) >= star
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
                   }`}
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoverRating(star)}
@@ -89,5 +91,5 @@ export default function AddReviewForm({ restroomId }: AddReviewFormProps) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

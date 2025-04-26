@@ -1,26 +1,40 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Star, MapPin, Clock, ThumbsUp, ThumbsDown, Camera, ArrowLeft, Sparkles } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import AIAnalysisCard from "@/components/ai-analysis-card"
-import AddReviewForm from "@/components/add-review-form"
-import MenstrualProductsSection from "@/components/menstrual-products-section"
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Star,
+  MapPin,
+  Clock,
+  ThumbsUp,
+  ThumbsDown,
+  Camera,
+  ArrowLeft,
+  Sparkles,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AIAnalysisCard from "@/components/ai-analysis-card";
+import AddReviewForm from "@/components/add-review-form";
+import MenstrualProductsSection from "@/components/menstrual-products-section";
 
 export default async function RestroomPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = await params
-  const restroom_id = Number.parseInt(id)
+  const { id } = await params;
+  const restroom_id = Number.parseInt(id);
 
   // This would come from your database in a real app
   const restroom = {
     id,
-    name: restroom_id === 1 ? "Central Park Restroom" : restroom_id === 2 ? "Mall Food Court Restroom" : "City Library Restroom",
+    name:
+      restroom_id === 1
+        ? "Central Park Restroom"
+        : restroom_id === 2
+          ? "Mall Food Court Restroom"
+          : "City Library Restroom",
     address: `${100 + restroom_id} Main Street, New York, NY`,
     distance: `${(0.2 * restroom_id).toFixed(1)} mi`,
     rating: 4 + (restroom_id % 2) * 0.5,
@@ -30,7 +44,11 @@ export default async function RestroomPage({
       privacy: 3.5 + (restroom_id % 2) * 0.5,
       accessibility: restroom_id % 2 === 0 ? 5 : 4,
     },
-    features: ["Gender Neutral", restroom_id % 2 === 0 ? "Baby Changing" : "Handicap Accessible", "Free"],
+    features: [
+      "Gender Neutral",
+      restroom_id % 2 === 0 ? "Baby Changing" : "Handicap Accessible",
+      "Free",
+    ],
     menstrualProducts: {
       available: restroom_id % 2 === 0,
       type: restroom_id % 2 === 0 ? "Free dispensers" : "Coin-operated",
@@ -72,13 +90,21 @@ export default async function RestroomPage({
     aiAnalysis: {
       pros: ["Clean", "Well-maintained", "Good lighting", "Accessible"],
       cons: ["Can be busy", "Occasional maintenance issues", "Limited stalls"],
-      imageFeatures: ["Modern fixtures", "Touchless faucets", "ADA compliant", "Good lighting"],
+      imageFeatures: [
+        "Modern fixtures",
+        "Touchless faucets",
+        "ADA compliant",
+        "Good lighting",
+      ],
     },
-  }
+  };
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground mb-4">
+      <Link
+        href="/"
+        className="flex items-center text-muted-foreground hover:text-foreground mb-4"
+      >
         <ArrowLeft className="h-4 w-4 mr-1" />
         Back to search
       </Link>
@@ -90,7 +116,9 @@ export default async function RestroomPage({
             <div className="flex items-center">
               <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 mr-1" />
               <span className="font-medium text-lg">{restroom.rating}</span>
-              <span className="text-muted-foreground ml-1">({restroom.reviewCount} reviews)</span>
+              <span className="text-muted-foreground ml-1">
+                ({restroom.reviewCount} reviews)
+              </span>
             </div>
           </div>
 
@@ -116,7 +144,10 @@ export default async function RestroomPage({
               </Badge>
             ))}
             {restroom.menstrualProducts?.available && (
-              <Badge variant="outline" className="bg-pink-50 text-pink-700 border-pink-200">
+              <Badge
+                variant="outline"
+                className="bg-pink-50 text-pink-700 border-pink-200"
+              >
                 Menstrual Products
               </Badge>
             )}
@@ -124,7 +155,10 @@ export default async function RestroomPage({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             {restroom.images.map((image, index) => (
-              <div key={index} className="relative h-48 rounded-lg overflow-hidden border">
+              <div
+                key={index}
+                className="relative h-48 rounded-lg overflow-hidden border"
+              >
                 <Image
                   src={image || "/placeholder.svg"}
                   alt={`${restroom.name} image ${index + 1}`}
@@ -139,8 +173,16 @@ export default async function RestroomPage({
             <MenstrualProductsSection
               data={{
                 ...restroom.menstrualProducts,
-                status: restroom_id % 3 === 0 ? "well-stocked" : restroom_id % 3 === 1 ? "low" : "empty",
-                reportedIssues: restroom_id % 2 === 0 ? ["Dispenser jammed", "Needs refill"] : [],
+                status:
+                  restroom_id % 3 === 0
+                    ? "well-stocked"
+                    : restroom_id % 3 === 1
+                      ? "low"
+                      : "empty",
+                reportedIssues:
+                  restroom_id % 2 === 0
+                    ? ["Dispenser jammed", "Needs refill"]
+                    : [],
               }}
               restroomId={restroom_id}
             />
@@ -165,7 +207,9 @@ export default async function RestroomPage({
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                       <div>
                         <div className="font-medium">{review.user}</div>
-                        <div className="text-sm text-muted-foreground">{review.date}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {review.date}
+                        </div>
                       </div>
                       <div className="flex items-center mt-2 sm:mt-0">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
@@ -193,28 +237,35 @@ export default async function RestroomPage({
             <TabsContent value="ratings" className="mt-4">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-medium mb-4">Rating Categories</h3>
+                  <h3 className="text-lg font-medium mb-4">
+                    Rating Categories
+                  </h3>
                   <div className="space-y-4">
-                    {Object.entries(restroom.categories).map(([category, rating]) => (
-                      <div key={category} className="flex items-center justify-between">
-                        <span className="capitalize">{category}</span>
-                        <div className="flex items-center">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-5 w-5 ${
-                                i < Math.floor(rating)
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : i < rating
-                                    ? "fill-yellow-400 text-yellow-400 opacity-50"
-                                    : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                          <span className="ml-2 font-medium">{rating}</span>
+                    {Object.entries(restroom.categories).map(
+                      ([category, rating]) => (
+                        <div
+                          key={category}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="capitalize">{category}</span>
+                          <div className="flex items-center">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-5 w-5 ${
+                                  i < Math.floor(rating)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : i < rating
+                                      ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                      : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                            <span className="ml-2 font-medium">{rating}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -245,7 +296,9 @@ export default async function RestroomPage({
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full bg-teal-600 hover:bg-teal-700">Get Directions</Button>
+                <Button className="w-full bg-teal-600 hover:bg-teal-700">
+                  Get Directions
+                </Button>
                 <Button variant="outline" className="w-full">
                   <Camera className="h-4 w-4 mr-2" />
                   Add Photos
@@ -262,5 +315,5 @@ export default async function RestroomPage({
         </div>
       </div>
     </main>
-  )
+  );
 }
