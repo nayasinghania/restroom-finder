@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { Button } from "@/components/ui/button"
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { RestroomSelect } from "@/db/schema";
+import { LocationDetailModal } from "./location-detail-modal";
 
 type LatLng = google.maps.LatLngLiteral;
 type RestroomWithPosition = { 
@@ -35,8 +37,13 @@ async function getUserLocation() {
 export default function MapView({ restrooms, onVisibleRestroomsChange }: MapViewProps) {
   const [center, setCenter] = useState({lat: 37.334, lng: -121.875});
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [selectedRestroom, setSelectedRestroom] = useState<RestroomSelect | null>(null);
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  
   const [allMarkers, setAllMarkers] = useState<RestroomWithPosition[]>([]);
   const [visibleMarkers, setVisibleMarkers] = useState<RestroomWithPosition[]>([]);
+
 
   const { isLoaded } = useJsApiLoader({
     id: 'annular-primer-458021-q3',
@@ -131,6 +138,23 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
   // Add map and onVisibleRestroomsChange to dependencies
   }, [isLoaded, restrooms, map, onVisibleRestroomsChange]);
 
+    // Handle marker click
+    const handleMarkerClick = (restroom: RestroomSelect) => {
+      setSelectedRestroom(restroom);
+      setShowInfoWindow(true);
+    }
+  
+    // Close info window
+    const handleInfoWindowClose = () => {
+      setShowInfoWindow(false);
+    }
+  
+    // Open detailed modal
+    const openDetailModal = () => {
+      setShowInfoWindow(false);
+      setShowDetailModal(true);
+    }
+
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
@@ -192,6 +216,8 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
   };
 
   return isLoaded ? (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+
     <GoogleMap
       mapContainerStyle={containerStyle}
       center={center}
@@ -203,9 +229,44 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
         <Marker 
           key={marker.restroom.id}
           position={marker.position}
+          onClick={() => handleMarkerClick(marker.restroom)}
         />
       ))}
+
+      {selectedRestroom && showInfoWindow && (
+          <InfoWindow
+            position={visibleMarkers.find(m => m.restroom.id === selectedRestroom.id)?.position}
+            onCloseClick={handleInfoWindowClose}
+          >
+            <div className="p-2">
+              <h3 className="font-bold">{selectedRestroom.name}</h3>
+              <p className="text-sm">{selectedRestroom.address}</p>
+              <Button 
+                className="mt-2 w-full" 
+                size="sm" 
+                onClick={openDetailModal}
+              >
+                View Details
+              </Button>
+            </div>
+          </InfoWindow>
+        )}
     </GoogleMap>
+    <LocationDetailModal
+        location={selectedRestroom ? {
+          id: selectedRestroom.id,
+          name: selectedRestroom.name,
+          position: visibleMarkers.find(m => m.restroom.id === selectedRestroom.id)?.position || {lat: 0, lng: 0},
+          address: selectedRestroom.address,
+          hours: selectedRestroom.hours,
+          imageUrl: selectedRestroom.images?.[0],
+          category: selectedRestroom.features?.[0]
+        } : null}
+        isOpen={showDetailModal}
+        onOpenChange={setShowDetailModal}
+      />
+
+    </div>
   ) : (
     <div>Loading Map...</div>
   );
