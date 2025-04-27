@@ -7,12 +7,8 @@ import { Star, MapPin, ThumbsUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RestroomSelect } from "@/db/schema";
 
-// Define the props interface
-interface RestroomCardProps {
-  restroom: RestroomSelect;
-}
+
 
 interface RestroomCardProps {
   id: string; // UUID as per schema
