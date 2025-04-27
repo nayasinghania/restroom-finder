@@ -200,7 +200,7 @@ export default function AddRestroomPage() {
                     <Checkbox
                       id={feature.replace(/\s+/g, "-").toLowerCase()}
                       checked={formData.features.includes(feature)}
-                      onChange={() => handleFeatureChange(feature)}
+                      onCheckedChange={() => handleFeatureChange(feature)}
                     />
                     <Label
                       htmlFor={feature.replace(/\s+/g, "-").toLowerCase()}

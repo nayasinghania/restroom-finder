@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { restrooms, reviews, analytics, menstrualProducts } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -94,6 +95,35 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const data = await request.json();
+    
+    // Create a new restroom with required fields
+    const newRestroom = {
+      id: uuidv4(), // Generate a UUID
+      name: data.name,
+      address: data.address,
+      hours: data.hours || "Not specified",
+      images: data.images || [],
+      features: data.features || [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Insert new restroom into the database
+    await db.insert(restrooms).values(newRestroom);
+
+    return NextResponse.json({ success: true, id: newRestroom.id }, { status: 201 });
+  } catch (error) {
+    console.error("Error creating restroom:", error);
+    return NextResponse.json(
+      { error: "Failed to create restroom" },
+      { status: 500 }
     );
   }
 }

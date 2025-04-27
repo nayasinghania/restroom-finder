@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { RestroomSelect } from "@/db/schema";
 import { LocationDetailModal } from "./location-detail-modal";
+import { RestroomData } from "./restroom-card";
+import { Loader2 } from "lucide-react";
 
 type LatLng = google.maps.LatLngLiteral;
 type RestroomWithPosition = { 
@@ -38,9 +40,11 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
   const [center, setCenter] = useState({lat: 37.334, lng: -121.875});
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedRestroom, setSelectedRestroom] = useState<RestroomSelect | null>(null);
+  const [selectedRestroomPosition, setSelectedRestroomPosition] = useState<LatLng | null>(null);
   const [showInfoWindow, setShowInfoWindow] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  
+  const [detailedRestroomData, setDetailedRestroomData] = useState<RestroomData | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [allMarkers, setAllMarkers] = useState<RestroomWithPosition[]>([]);
   const [visibleMarkers, setVisibleMarkers] = useState<RestroomWithPosition[]>([]);
 
@@ -139,20 +143,47 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
   }, [isLoaded, restrooms, map, onVisibleRestroomsChange]);
 
     // Handle marker click
-    const handleMarkerClick = (restroom: RestroomSelect) => {
-      setSelectedRestroom(restroom);
+    const handleMarkerClick = (markerData: RestroomWithPosition) => {
+      setSelectedRestroom(markerData.restroom);
+      setSelectedRestroomPosition(markerData.position); // Store position
+      setDetailedRestroomData(null); // Clear old detailed data
       setShowInfoWindow(true);
+      setShowDetailModal(false);
     }
   
     // Close info window
     const handleInfoWindowClose = () => {
       setShowInfoWindow(false);
+      setSelectedRestroom(null); // Clear selection when info window closes
+      setSelectedRestroomPosition(null);
+      setDetailedRestroomData(null);
     }
   
     // Open detailed modal
-    const openDetailModal = () => {
-      setShowInfoWindow(false);
-      setShowDetailModal(true);
+    const openDetailModal = async () => {
+      if (!selectedRestroom) return;
+  
+      setShowInfoWindow(false); // Close info window first
+      setIsDetailLoading(true);
+      setDetailedRestroomData(null); // Clear previous data while loading
+  
+      try {
+        const response = await fetch(`/api/restroom?id=${selectedRestroom.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch restroom details");
+        }
+        
+        const data: RestroomData = await response.json();
+      
+        setDetailedRestroomData(data);
+        setShowDetailModal(true); // Open modal only after successful fetch
+        console.log("Fetched detailed data:", data);
+      } catch (error) {
+        console.error("Error fetching restroom details:", error);
+        // Optionally show an error message to the user
+      } finally {
+        setIsDetailLoading(false);
+      }
     }
 
   const onLoad = useCallback((map: google.maps.Map) => {
@@ -224,45 +255,58 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
       zoom={15}
       onLoad={onLoad}
       onIdle={onIdle}
+      onClick={handleInfoWindowClose}
     >
       {visibleMarkers.map((marker) => (
         <Marker 
           key={marker.restroom.id}
           position={marker.position}
-          onClick={() => handleMarkerClick(marker.restroom)}
+          onClick={() => handleMarkerClick(marker)}
         />
       ))}
 
-      {selectedRestroom && showInfoWindow && (
+      {selectedRestroom && selectedRestroomPosition && showInfoWindow && (
           <InfoWindow
-            position={visibleMarkers.find(m => m.restroom.id === selectedRestroom.id)?.position}
+            position={selectedRestroomPosition}
             onCloseClick={handleInfoWindowClose}
           >
-            <div className="p-2">
-              <h3 className="font-bold">{selectedRestroom.name}</h3>
-              <p className="text-sm">{selectedRestroom.address}</p>
-              <Button 
-                className="mt-2 w-full" 
-                size="sm" 
+            <div className="p-1 w-48"> {/* Adjusted padding and width */}
+              <h3 className="font-semibold text-sm mb-1 truncate">{selectedRestroom.name}</h3>
+              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{selectedRestroom.address}</p>
+              <Button
+                className="w-full"
+                size="sm" // Smaller button
                 onClick={openDetailModal}
+                disabled={isDetailLoading} // Disable while loading details
               >
-                View Details
+                {isDetailLoading ? (
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                ) : null}
+                {isDetailLoading ? "Loading..." : "View Details"}
               </Button>
             </div>
           </InfoWindow>
-        )}
+      )}
     </GoogleMap>
     <LocationDetailModal
-        location={selectedRestroom ? {
-          id: selectedRestroom.id,
-          name: selectedRestroom.name,
-          position: visibleMarkers.find(m => m.restroom.id === selectedRestroom.id)?.position || {lat: 0, lng: 0},
-          address: selectedRestroom.address,
-          hours: selectedRestroom.hours,
-          imageUrl: selectedRestroom.images?.[0],
-          category: selectedRestroom.features?.[0]
+        // Construct the 'location' prop expected by the modal
+        // using a combination of detailed and basic data
+        location={detailedRestroomData && selectedRestroomPosition ? {
+          id: detailedRestroomData.id,
+          name: detailedRestroomData.name,
+          position: selectedRestroomPosition, // Use the stored position
+          address: detailedRestroomData.address,
+          // Include other fields from RestroomData if LocationDetailModal uses them
+          // e.g., map hours, website if they exist in RestroomData,
+          // or use fallback from selectedRestroom if necessary
+          hours: selectedRestroom?.hours, // Example fallback
+          imageUrl: detailedRestroomData.images?.[0], // Use detailed image
+          category: detailedRestroomData.features?.[0], // Use detailed feature
+          // Add rating/review info if you modify LocationDetailModal to show it
+           averageRating: detailedRestroomData.averageRating,
+           reviewCount: detailedRestroomData.reviewCount,
         } : null}
-        isOpen={showDetailModal}
+        isOpen={showDetailModal && !isDetailLoading} // Only open when not loading and data is potentially ready
         onOpenChange={setShowDetailModal}
       />
 
