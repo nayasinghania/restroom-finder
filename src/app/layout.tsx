@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
 import ModeToggle from "@/components/theme/mode-toggle";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Restroom Finder",
@@ -14,21 +15,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head />
-      <body>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head />
         <body>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div>{children}</div>
-            <ModeToggle />
-          </ThemeProvider>
+          <body>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div>{children}</div>
+              <ModeToggle />
+            </ThemeProvider>
+          </body>
         </body>
-      </body>
-    </html>
+      </html>
+    </ClerkProvider>
   );
 }
