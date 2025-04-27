@@ -1,125 +1,273 @@
-"use client";
+import { useEffect, useState, useCallback } from "react";
+import { Button } from "@/components/ui/button"
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import { RestroomSelect } from "@/db/schema";
+import { LocationDetailModal } from "./location-detail-modal";
 
-import { useEffect, useRef } from "react";
-import { MapPin } from "lucide-react";
+type LatLng = google.maps.LatLngLiteral;
+type RestroomWithPosition = { 
+  restroom: RestroomSelect, 
+  position: LatLng 
+};
 
-export default function MapView() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+interface MapViewProps {
+  restrooms: RestroomSelect[];
+  onVisibleRestroomsChange: (visibleRestrooms: RestroomSelect[]) => void;
+}
 
-  // Mock data for restroom locations
-  const locations = [
-    { x: 150, y: 100, rating: 4.5, name: "Central Park Restroom" },
-    { x: 300, y: 200, rating: 4.0, name: "Mall Food Court Restroom" },
-    { x: 450, y: 150, rating: 3.5, name: "City Library Restroom" },
-    { x: 200, y: 300, rating: 5.0, name: "Train Station Restroom" },
-    { x: 400, y: 350, rating: 4.2, name: "Beach Pavilion Restroom" },
-  ];
+async function getUserLocation() {
+  return new Promise<GeolocationPosition>((resolve, reject) => {
+    
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set canvas dimensions to match container
-    const resizeCanvas = () => {
-      const parent = canvas.parentElement;
-      if (parent) {
-        canvas.width = parent.clientWidth;
-        canvas.height = parent.clientHeight;
-        drawMap();
-      }
+    const options = {
+      enableHighAccuracy: false,  // faster, "coarse" location
+      timeout:        30000,      // wait up to 30 s
+      maximumAge:     600000      // allow a 10 min cached fix
     };
 
-    // Draw the map
-    const drawMap = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by this browser."));
+    } else {
+      console.log("Getting Location!");
+      return navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    }
+  });
+}
 
-      // Draw background
-      ctx.fillStyle = "#f0f4f8";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+export default function MapView({ restrooms, onVisibleRestroomsChange }: MapViewProps) {
+  const [center, setCenter] = useState({lat: 37.334, lng: -121.875});
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [selectedRestroom, setSelectedRestroom] = useState<RestroomSelect | null>(null);
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  const [allMarkers, setAllMarkers] = useState<RestroomWithPosition[]>([]);
+  const [visibleMarkers, setVisibleMarkers] = useState<RestroomWithPosition[]>([]);
 
-      // Draw some roads
-      ctx.strokeStyle = "#d1d5db";
-      ctx.lineWidth = 8;
 
-      // Horizontal roads
-      for (let y = 100; y < canvas.height; y += 200) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
+  const { isLoaded } = useJsApiLoader({
+    id: 'annular-primer-458021-q3',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GMAPS_API_KEY || '',
+  });
+
+  // Geocode restrooms when they change
+  useEffect(() => {
+    // Guard clause: Ensure everything needed is available
+    if (!isLoaded || !map || !restrooms) {
+      // If restrooms become explicitly empty, clear markers and notify parent
+      if (restrooms && restrooms.length === 0) {
+         console.log("MapView: restrooms prop empty, clearing states.");
+         setAllMarkers([]);
+         setVisibleMarkers([]);
+         onVisibleRestroomsChange([]);
       }
+      return; 
+    }
+    
+    // Only proceed if there are restrooms to geocode
+    if (restrooms.length === 0) return;
 
-      // Vertical roads
-      for (let x = 100; x < canvas.width; x += 200) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
+    console.log("MapView: Ready to geocode", { isLoaded, mapExists: !!map, numRestrooms: restrooms.length });
+    const geocoder = new window.google.maps.Geocoder();
+    let isMounted = true; // Flag to prevent state updates if component unmounts during async ops
 
-      // Draw blocks
-      ctx.fillStyle = "#e5e7eb";
-      for (let x = 0; x < canvas.width; x += 200) {
-        for (let y = 0; y < canvas.height; y += 200) {
-          ctx.fillRect(x + 10, y + 10, 180, 180);
+    const geocodeAndFilter = async () => {
+      const markers: RestroomWithPosition[] = [];
+      for (const restroom of restrooms) {
+        if (!isMounted) return; // Stop if unmounted
+        try {
+          const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+            geocoder.geocode({ address: restroom.address }, (results, status) => {
+              if (status === "OK" && results) resolve(results);
+              else reject(status);
+            });
+          });
+          if (result[0]) {
+            markers.push({ restroom, position: result[0].geometry.location.toJSON() });
+          }
+        } catch (error) {
+          console.error(`Error geocoding ${restroom.address}:`, error);
         }
       }
 
-      // Draw location pins
-      locations.forEach((loc) => {
-        const x = (loc.x / 500) * canvas.width;
-        const y = (loc.y / 400) * canvas.height;
+      if (!isMounted) return; // Check again after async loop
 
-        // Pin shadow
-        ctx.beginPath();
-        ctx.arc(x, y, 12, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-        ctx.fill();
+      console.log("MapView: Geocoding complete, setting all markers:", markers.length);
+      setAllMarkers(markers);
 
-        // Pin background
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "#14b8a6";
-        ctx.fill();
-
-        // Rating text
-        ctx.fillStyle = "white";
-        ctx.font = "bold 10px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(loc.rating.toString(), x, y);
-      });
+      // --- Perform initial filtering immediately after geocoding ---
+      const currentMap = map; // Use map state directly
+      if (currentMap) {
+          const bounds = currentMap.getBounds();
+          if (bounds) {
+              console.log("MapView: Calculating initial visibility with bounds.");
+              const initiallyVisibleMarkers = markers.filter(marker =>
+                  bounds.contains(new window.google.maps.LatLng(marker.position))
+              );
+              if (isMounted) { // Final check before state updates
+                setVisibleMarkers(initiallyVisibleMarkers); // Update local visible state
+                onVisibleRestroomsChange(initiallyVisibleMarkers.map(m => m.restroom)); // Notify parent
+                console.log("MapView: Initial visible markers set:", initiallyVisibleMarkers.length);
+              }
+          } else {
+              // Bounds might not be ready *immediately* after map load in some rare cases
+              console.warn("MapView: Initial bounds not ready immediately after geocoding. Waiting for onIdle.");
+              if (isMounted) {
+                 setVisibleMarkers([]); // Default to empty if bounds aren't ready
+                 onVisibleRestroomsChange([]);
+              }
+          }
+      } else {
+          // Should not happen due to guard clause, but defensive check
+           console.error("MapView: Map instance lost before initial filter.");
+           if (isMounted) {
+             setVisibleMarkers([]);
+             onVisibleRestroomsChange([]);
+           }
+      }
     };
 
-    // Initial setup
-    resizeCanvas();
+    geocodeAndFilter();
 
-    // Handle window resize
-    window.addEventListener("resize", resizeCanvas);
-
+    // Cleanup function to set the mounted flag to false when the component unmounts
+    // or when dependencies change causing the effect to re-run
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
+      isMounted = false;
+      console.log("MapView: Geocoding effect cleanup.");
     };
+  // Add map and onVisibleRestroomsChange to dependencies
+  }, [isLoaded, restrooms, map, onVisibleRestroomsChange]);
+
+    // Handle marker click
+    const handleMarkerClick = (restroom: RestroomSelect) => {
+      setSelectedRestroom(restroom);
+      setShowInfoWindow(true);
+    }
+  
+    // Close info window
+    const handleInfoWindowClose = () => {
+      setShowInfoWindow(false);
+    }
+  
+    // Open detailed modal
+    const openDetailModal = () => {
+      setShowInfoWindow(false);
+      setShowDetailModal(true);
+    }
+
+  const onLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
   }, []);
 
-  return (
-    <div className="relative h-full w-full">
-      <canvas ref={canvasRef} className="w-full h-full" />
-      <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-md">
-        <div className="flex items-center mb-2">
-          <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center mr-2">
-            <MapPin className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-sm font-medium">Your Location</span>
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Click on a pin to view restroom details
-        </div>
-      </div>
+  // Update visible markers when map bounds change
+  const onIdle = useCallback(() => {
+    if (!map || allMarkers.length === 0) { // Check allMarkers here
+      console.log("MapView: onIdle skipped (no map or no markers)");
+      return; // Don't filter if geocoding hasn't finished or map is gone
+   }
+    
+    const bounds = map.getBounds();
+    if (!bounds) return;
+    
+    const visible = allMarkers.filter(marker => 
+      bounds.contains(new window.google.maps.LatLng(marker.position))
+    );
+    
+    setVisibleMarkers(visible);
+    
+    // Notify parent component about visible restrooms
+    onVisibleRestroomsChange(visible.map(m => m.restroom));
+  }, [map, allMarkers, onVisibleRestroomsChange]);
+
+  
+  useEffect(() => {
+    if (map) {
+       map.panTo(center);
+       map.setZoom(15);
+    }
+  }, [center, map]);
+  
+  useEffect(() => {
+    async function fetchLocation() {
+      try {
+        const position = await getUserLocation();
+        console.log({"lat": position.coords.latitude});
+        console.log({"lng": position.coords.longitude});
+        setCenter({lat: position.coords.latitude, lng: position.coords.longitude});
+      } catch (error: unknown) {
+        if (error instanceof GeolocationPositionError && error.code === 3) {
+          // retry without high-accuracy and a short timeout
+          navigator.geolocation.getCurrentPosition(
+            pos => setCenter({lat: pos.coords.latitude, lng: pos.coords.longitude}),
+            console.error,
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+          );
+        } else {
+        console.error('Error getting location:', error);
+        }
+      }
+    }
+    fetchLocation();
+  }, []);
+
+  const containerStyle = {
+    width: '100%',
+    height: '100%',
+  };
+
+  return isLoaded ? (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={15}
+      onLoad={onLoad}
+      onIdle={onIdle}
+    >
+      {visibleMarkers.map((marker) => (
+        <Marker 
+          key={marker.restroom.id}
+          position={marker.position}
+          onClick={() => handleMarkerClick(marker.restroom)}
+        />
+      ))}
+
+      {selectedRestroom && showInfoWindow && (
+          <InfoWindow
+            position={visibleMarkers.find(m => m.restroom.id === selectedRestroom.id)?.position}
+            onCloseClick={handleInfoWindowClose}
+          >
+            <div className="p-2">
+              <h3 className="font-bold">{selectedRestroom.name}</h3>
+              <p className="text-sm">{selectedRestroom.address}</p>
+              <Button 
+                className="mt-2 w-full" 
+                size="sm" 
+                onClick={openDetailModal}
+              >
+                View Details
+              </Button>
+            </div>
+          </InfoWindow>
+        )}
+    </GoogleMap>
+    <LocationDetailModal
+        location={selectedRestroom ? {
+          id: selectedRestroom.id,
+          name: selectedRestroom.name,
+          position: visibleMarkers.find(m => m.restroom.id === selectedRestroom.id)?.position || {lat: 0, lng: 0},
+          address: selectedRestroom.address,
+          hours: selectedRestroom.hours,
+          imageUrl: selectedRestroom.images?.[0],
+          category: selectedRestroom.features?.[0]
+        } : null}
+        isOpen={showDetailModal}
+        onOpenChange={setShowDetailModal}
+      />
+
     </div>
+  ) : (
+    <div>Loading Map...</div>
   );
 }

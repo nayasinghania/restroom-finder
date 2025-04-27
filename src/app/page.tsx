@@ -1,61 +1,76 @@
-import Link from "next/link";
-import { Search, MapPin, Plus } from "lucide-react";
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import RestroomCard from "@/components/restroom-card";
 import MapView from "@/components/map-view";
 import MenstrualProductFilter from "@/components/menstrual-product-filter";
+import Header from "@/components/header";
+import { RestroomSelect } from "@/db/schema";
 
 export default function HomePage() {
+  const [allRestrooms, setAllRestrooms] = useState<RestroomSelect[]>([]);
+  const [visibleRestrooms, setVisibleRestrooms] = useState<RestroomSelect[]>([]);
+
+  useEffect(() => {
+    async function fetchRestrooms() {
+      try {
+        const response = await fetch("/api/restrooms");
+        if (!response.ok) {
+          throw new Error("Failed to fetch restrooms");
+        }
+        
+        const data = await response.json();
+        setAllRestrooms(data);
+        // Initially set all restrooms as visible until map filters them
+        //setVisibleRestrooms(data);
+      } catch (error) {
+        console.error("Error fetching restrooms:", error);
+      }
+    }
+    
+    fetchRestrooms();
+  }, []);
+
+  // Handle updates from MapView when viewport changes
+  const handleVisibleRestroomsChange = useCallback((newVisibleRestrooms: RestroomSelect[]) => {
+    setVisibleRestrooms(newVisibleRestrooms);
+  }, []);
+
   return (
-    <main className="container mx-auto px-4 py-6">
-      <header className="flex flex-col sm:flex-row items-center justify-between mb-8">
-        <div className="flex items-center mb-4 sm:mb-0">
-          <h1 className="text-2xl font-bold mr-2">RestroomFinder</h1>
-          <MapPin className="h-5 w-5 text-teal-500" />
-        </div>
-        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search restrooms..." className="pl-8" />
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="grid grid-cols-1 md:grid-cols-2 flex-grow">
+        <div className="p-4 overflow-auto">
+          <h2 className="text-2xl font-bold mb-4">Nearby Restrooms</h2>
+          <div className="flex space-x-2 mb-4">
+            <MenstrualProductFilter />
+            <Button variant="outline">Filter</Button>
+            <Button variant="outline">Highest Rated</Button>
+            <Button variant="outline">Nearest</Button>
+            <Button variant="outline">Most Reviewed</Button>
           </div>
-          <Link href="/add-restroom" className="w-full sm:w-auto">
-            <Button className="bg-teal-600 hover:bg-teal-700 w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Restroom
-            </Button>
-          </Link>
-        </div>
-      </header>
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-1/3 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-            <h2 className="text-xl font-semibold">Nearby Restrooms</h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm">
-                Filter
-              </Button>
-              <MenstrualProductFilter />
-              <select className="h-9 rounded-md border border-input px-3 py-1 text-sm">
-                <option>Highest Rated</option>
-                <option>Nearest</option>
-                <option>Most Reviewed</option>
-              </select>
+          
+          {visibleRestrooms.length > 0 ? (
+            <div className="space-y-4">
+              {visibleRestrooms.map((restroom: RestroomSelect) => (
+                <RestroomCard key={restroom.id} id={restroom.id} />
+              ))}
             </div>
-          </div>
-
-          <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-2">
-            {[1, 2, 3, 4, 5].map((id) => (
-              <RestroomCard key={id} id={id} />
-            ))}
-          </div>
+          ) : (
+            <p className="text-center text-gray-500 mt-8">
+              No restrooms visible in the current map area. Try zooming out or panning the map.
+            </p>
+          )}
         </div>
-
-        <div className="w-full lg:w-2/3 h-[50vh] lg:h-[calc(100vh-180px)] rounded-lg overflow-hidden border">
-          <MapView />
+        
+        <div className="bg-gray-100">
+          <MapView 
+            restrooms={allRestrooms} 
+            onVisibleRestroomsChange={handleVisibleRestroomsChange}
+          />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

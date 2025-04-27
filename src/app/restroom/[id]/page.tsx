@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,87 +20,51 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIAnalysisCard from "@/components/ai-analysis-card";
 import AddReviewForm from "@/components/add-review-form";
 import MenstrualProductsSection from "@/components/menstrual-products-section";
+import { ReviewSelect } from "@/db/schema";
 
-export default async function RestroomPage({
+export default function RestroomPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const restroom_id = Number.parseInt(id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [restroom, setRestroom] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // This would come from your database in a real app
-  const restroom = {
-    id,
-    name:
-      restroom_id === 1
-        ? "Central Park Restroom"
-        : restroom_id === 2
-          ? "Mall Food Court Restroom"
-          : "City Library Restroom",
-    address: `${100 + restroom_id} Main Street, New York, NY`,
-    distance: `${(0.2 * restroom_id).toFixed(1)} mi`,
-    rating: 4 + (restroom_id % 2) * 0.5,
-    reviewCount: 10 * restroom_id,
-    categories: {
-      cleanliness: 4 + (restroom_id % 3) * 0.5,
-      privacy: 3.5 + (restroom_id % 2) * 0.5,
-      accessibility: restroom_id % 2 === 0 ? 5 : 4,
-    },
-    features: [
-      "Gender Neutral",
-      restroom_id % 2 === 0 ? "Baby Changing" : "Handicap Accessible",
-      "Free",
-    ],
-    menstrualProducts: {
-      available: restroom_id % 2 === 0,
-      type: restroom_id % 2 === 0 ? "Free dispensers" : "Coin-operated",
-      lastRestocked: restroom_id % 2 === 0 ? "2 days ago" : "1 week ago",
-      images:
-        restroom_id % 2 === 0
-          ? [
-              `/placeholder.svg?height=200&width=300&text=Menstrual+Product+Dispenser+1`,
-              `/placeholder.svg?height=200&width=300&text=Menstrual+Product+Dispenser+2`,
-            ]
-          : [],
-    },
-    hours: "7:00 AM - 10:00 PM",
-    images: [
-      `/placeholder.svg?height=300&width=400&text=Restroom+${restroom_id}+Image+1`,
-      `/placeholder.svg?height=300&width=400&text=Restroom+${restroom_id}+Image+2`,
-      `/placeholder.svg?height=300&width=400&text=Restroom+${restroom_id}+Image+3`,
-    ],
-    reviews: [
-      {
-        id: 1,
-        user: "Alex Johnson",
-        date: "2 days ago",
-        rating: 4.5,
-        text: "Very clean restroom with good privacy. The soap dispensers were full and everything worked well. Only downside was a slight wait during peak hours.",
-        helpful: 12,
-        unhelpful: 2,
-      },
-      {
-        id: 2,
-        user: "Sam Taylor",
-        date: "1 week ago",
-        rating: 3.5,
-        text: "Decent restroom but could be cleaner. The hand dryer was broken when I visited. On the plus side, it was very accessible and had good baby changing facilities.",
-        helpful: 8,
-        unhelpful: 1,
-      },
-    ],
-    aiAnalysis: {
-      pros: ["Clean", "Well-maintained", "Good lighting", "Accessible"],
-      cons: ["Can be busy", "Occasional maintenance issues", "Limited stalls"],
-      imageFeatures: [
-        "Modern fixtures",
-        "Touchless faucets",
-        "ADA compliant",
-        "Good lighting",
-      ],
-    },
-  };
+  useEffect(() => {
+    async function fetchRestroomData() {
+      try {
+        const { id } = await params; // Unwrap the params Promise
+        const response = await fetch(`/api/restroom?id=${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch restroom data");
+        }
+        const data = await response.json();
+        console.log("Fetched restroom data:", data);
+        setRestroom(data);
+      } catch (err) {
+        setError("Failed to load restroom data.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRestroomData();
+  }, [params]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (!restroom) {
+    return <p>Restroom not found.</p>;
+  }
 
   return (
     <main className="container mx-auto px-4 py-6">
@@ -115,7 +82,9 @@ export default async function RestroomPage({
             <h1 className="text-2xl font-bold mb-2 md:mb-0">{restroom.name}</h1>
             <div className="flex items-center">
               <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 mr-1" />
-              <span className="font-medium text-lg">{restroom.rating}</span>
+              <span className="font-medium text-lg">
+                {restroom.averageRating}
+              </span>
               <span className="text-muted-foreground ml-1">
                 ({restroom.reviewCount} reviews)
               </span>
@@ -134,11 +103,15 @@ export default async function RestroomPage({
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">
-            {restroom.features.map((feature) => (
+            {restroom.features.map((feature: string) => (
               <Badge
                 key={feature}
                 variant="outline"
-                className={`${feature === "Menstrual Products" ? "bg-pink-50 text-pink-700 border-pink-200" : "bg-teal-50 text-teal-700 border-teal-200"}`}
+                className={`${
+                  feature === "Menstrual Products"
+                    ? "bg-pink-50 text-pink-700 border-pink-200"
+                    : "bg-teal-50 text-teal-700 border-teal-200"
+                }`}
               >
                 {feature}
               </Badge>
@@ -154,13 +127,13 @@ export default async function RestroomPage({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-            {restroom.images.map((image, index) => (
+            {restroom.images.map((image: string, index: number) => (
               <div
                 key={index}
                 className="relative h-48 rounded-lg overflow-hidden border"
               >
                 <Image
-                  src={image || "/placeholder.svg"}
+                  src={"/placeholder.svg"}
                   alt={`${restroom.name} image ${index + 1}`}
                   fill
                   className="object-cover"
@@ -173,18 +146,10 @@ export default async function RestroomPage({
             <MenstrualProductsSection
               data={{
                 ...restroom.menstrualProducts,
-                status:
-                  restroom_id % 3 === 0
-                    ? "well-stocked"
-                    : restroom_id % 3 === 1
-                      ? "low"
-                      : "empty",
-                reportedIssues:
-                  restroom_id % 2 === 0
-                    ? ["Dispenser jammed", "Needs refill"]
-                    : [],
+                status: restroom.menstrualProducts.status || "unknown",
+                reportedIssues: restroom.menstrualProducts.reportedIssues || [],
               }}
-              restroomId={restroom_id}
+              restroomId={restroom.id}
             />
           )}
 
@@ -201,14 +166,14 @@ export default async function RestroomPage({
             </TabsList>
 
             <TabsContent value="reviews" className="space-y-4 mt-4">
-              {restroom.reviews.map((review) => (
+              {restroom.reviews.map((review: ReviewSelect) => (
                 <Card key={review.id}>
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                       <div>
-                        <div className="font-medium">{review.user}</div>
+                        <div className="font-medium">{review.userName}</div>
                         <div className="text-sm text-muted-foreground">
-                          {review.date}
+                          {review.createdAt.toString()}
                         </div>
                       </div>
                       <div className="flex items-center mt-2 sm:mt-0">
@@ -216,7 +181,7 @@ export default async function RestroomPage({
                         <span>{review.rating}</span>
                       </div>
                     </div>
-                    <p className="my-3">{review.text}</p>
+                    <p className="my-3">{review.comment}</p>
                     <div className="flex items-center text-sm">
                       <Button variant="ghost" size="sm" className="h-8">
                         <ThumbsUp className="h-4 w-4 mr-1" />
@@ -231,7 +196,7 @@ export default async function RestroomPage({
                 </Card>
               ))}
 
-              <AddReviewForm restroomId={restroom_id} />
+              <AddReviewForm restroomId={restroom.id} />
             </TabsContent>
 
             <TabsContent value="ratings" className="mt-4">
@@ -241,31 +206,31 @@ export default async function RestroomPage({
                     Rating Categories
                   </h3>
                   <div className="space-y-4">
-                    {Object.entries(restroom.categories).map(
-                      ([category, rating]) => (
-                        <div
-                          key={category}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="capitalize">{category}</span>
-                          <div className="flex items-center">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-5 w-5 ${
-                                  i < Math.floor(rating)
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : i < rating
-                                      ? "fill-yellow-400 text-yellow-400 opacity-50"
-                                      : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                            <span className="ml-2 font-medium">{rating}</span>
-                          </div>
+                    {Object.entries(
+                      restroom.features as Record<string, number>,
+                    ).map(([category, rating]) => (
+                      <div
+                        key={category}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="capitalize">{category}</span>
+                        <div className="flex items-center">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-5 w-5 ${
+                                i < Math.floor(rating)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : i < rating
+                                    ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                    : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                          <span className="ml-2 font-medium">{rating}</span>
                         </div>
-                      ),
-                    )}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

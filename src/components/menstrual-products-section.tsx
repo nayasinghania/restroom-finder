@@ -84,7 +84,7 @@ export default function MenstrualProductsSection({
                       className="relative h-32 rounded-lg overflow-hidden border"
                     >
                       <Image
-                        src={image || "/placeholder.svg"}
+                        src={"/placeholder.svg"}
                         alt={`Menstrual product dispenser image ${index + 1}`}
                         fill
                         className="object-cover"
