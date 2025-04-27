@@ -134,7 +134,7 @@ export default function RestroomPage({
                   className="relative h-48 rounded-lg overflow-hidden border"
                 >
                   <Image
-                    src={image}
+                    src={`/${image}`}
                     alt={`${restroom.name} image ${index + 1}`}
                     fill
                     className="object-cover"
@@ -248,7 +248,7 @@ export default function RestroomPage({
             </TabsContent>
 
             <TabsContent value="ai-analysis" className="mt-4">
-              <AIAnalysisCard analysis={restroom.aiAnalysis} />
+              <AIAnalysisCard />
             </TabsContent>
           </Tabs>
         </div>

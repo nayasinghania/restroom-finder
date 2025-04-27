@@ -271,8 +271,8 @@ export default function MapView({ restrooms, onVisibleRestroomsChange }: MapView
             onCloseClick={handleInfoWindowClose}
           >
             <div className="p-1 w-48"> {/* Adjusted padding and width */}
-              <h3 className="font-semibold text-sm mb-1 truncate">{selectedRestroom.name}</h3>
-              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{selectedRestroom.address}</p>
+              <h3 className="font-semibold text-sm mb-1 truncate text-black">{selectedRestroom.name}</h3>
+              <p className="text-xs text-gray-800 mb-2 line-clamp-2">{selectedRestroom.address}</p>
               <Button
                 className="w-full"
                 size="sm" // Smaller button
