@@ -84,7 +84,7 @@ export default function MenstrualProductsSection({
                       className="relative h-32 rounded-lg overflow-hidden border"
                     >
                       <Image
-                        src={"/placeholder.svg"}
+                        src={image}
                         alt={`Menstrual product dispenser image ${index + 1}`}
                         fill
                         className="object-cover"
@@ -95,6 +95,14 @@ export default function MenstrualProductsSection({
               </div>
             ) : (
               <div className="text-center py-3 border border-dashed rounded-md">
+                <div className="relative h-32 rounded-lg overflow-hidden border mb-2">
+                  <Image
+                    src="/default-bathroom.png"
+                    alt="Default menstrual products dispenser image"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
                 <Camera className="h-6 w-6 mx-auto text-muted-foreground mb-1" />
                 <p className="text-sm text-muted-foreground">
                   No dispenser images yet

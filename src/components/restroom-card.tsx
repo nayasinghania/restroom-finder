@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
-
 interface RestroomCardProps {
   id: string; // UUID as per schema
 }
@@ -69,11 +67,22 @@ export default function RestroomCard({ id }: RestroomCardProps) {
           {/* Image container with fixed aspect ratio */}
           <div className="relative w-full md:w-1/3 aspect-[4/3] md:aspect-auto">
             <Image
-              src={"/placeholder.svg"}
+              src={
+                restroom.images &&
+                restroom.images.length > 0 &&
+                restroom.images[0].startsWith("http")
+                  ? restroom.images[0]
+                  : "/default-bathroom.png"
+              }
               alt={restroom.name}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className="object-cover"
+              priority={false}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/default-bathroom.png";
+              }}
             />
           </div>
 

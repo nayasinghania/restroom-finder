@@ -127,19 +127,30 @@ export default function RestroomPage({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-            {restroom.images.map((image: string, index: number) => (
-              <div
-                key={index}
-                className="relative h-48 rounded-lg overflow-hidden border"
-              >
+            {restroom.images && restroom.images.length > 0 ? (
+              restroom.images.map((image: string, index: number) => (
+                <div
+                  key={index}
+                  className="relative h-48 rounded-lg overflow-hidden border"
+                >
+                  <Image
+                    src={image}
+                    alt={`${restroom.name} image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="relative h-48 rounded-lg overflow-hidden border">
                 <Image
-                  src={"/placeholder.svg"}
-                  alt={`${restroom.name} image ${index + 1}`}
+                  src="/default-bathroom.png"
+                  alt={`${restroom.name} default image`}
                   fill
                   className="object-cover"
                 />
               </div>
-            ))}
+            )}
           </div>
 
           {restroom.menstrualProducts && (
