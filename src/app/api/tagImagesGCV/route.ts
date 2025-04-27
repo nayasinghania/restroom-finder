@@ -346,7 +346,7 @@ async function analyzeImage(imageBuffer: Buffer): Promise<ImageAnalysisResult> {
 
     // Log which features were detected
     const detectedFeatures = Object.entries(features)
-      .filter(([_, value]) => value)
+      .filter(([, value]) => value)
       .map(([key]) => key);
 
     console.log(
@@ -439,7 +439,7 @@ export async function POST(req: Request) {
     console.log(
       `Analysis complete. Combined features: ${
         Object.entries(combinedFeatures)
-          .filter(([_, value]) => value)
+          .filter(([, value]) => value)
           .map(([key]) => key)
           .join(", ") || "None"
       }`,
@@ -447,7 +447,7 @@ export async function POST(req: Request) {
 
     // Create a list of detected features (features that are true)
     const detectedFeatures = Object.entries(combinedFeatures)
-      .filter(([_, value]) => value)
+      .filter(([, value]) => value)
       .map(([key]) => key);
 
     // Return the detected features and their confidence scores
