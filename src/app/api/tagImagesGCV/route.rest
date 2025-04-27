@@ -1,0 +1,115 @@
+### Test 1: Analyze Tampa Airport restroom images
+POST http://localhost:3000/api/tagImagesGCV
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="tampa-airport-1.png"
+Content-Type: image/png
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/tampa-airport/tampa-airport-1.png
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="tampa-airport-2.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/tampa-airport/tampa-airport-2.jpg
+------WebKitFormBoundary--
+
+### Test 2: Analyze Field Museum restroom images
+POST http://localhost:3000/api/tagImagesGCV
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="field-museum-1.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/field-museum/field-museum-1.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="field-museum-2.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/field-museum/field-museum-2.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="field-museum-3.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/field-museum/field-museum-3.jpg
+------WebKitFormBoundary--
+
+### Test 3: Analyze Baltimore Airport restroom images
+POST http://localhost:3000/api/tagImagesGCV
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="baltimore-airport-1.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/baltimore-airport/baltimore-airport-1.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="baltimore-airport-2.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/baltimore-airport/baltimore-airport-2.jpg
+------WebKitFormBoundary--
+
+### Test 4: Analyze Pittsburgh restroom image
+POST http://localhost:3000/api/tagImagesGCV
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="pittsburgh-restroom-1.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/pittsburgh-restroom/pittsburgh-restroom-1.jpg
+------WebKitFormBoundary--
+
+### Test 5: Analyze all restroom images together
+POST http://localhost:3000/api/tagImagesGCV
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="tampa-airport-1.png"
+Content-Type: image/png
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/tampa-airport/tampa-airport-1.png
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="tampa-airport-2.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/tampa-airport/tampa-airport-2.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="field-museum-1.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/field-museum/field-museum-1.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="field-museum-2.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/field-museum/field-museum-2.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="field-museum-3.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/field-museum/field-museum-3.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="baltimore-airport-1.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/baltimore-airport/baltimore-airport-1.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="baltimore-airport-2.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/baltimore-airport/baltimore-airport-2.jpg
+------WebKitFormBoundary
+Content-Disposition: form-data; name="images"; filename="pittsburgh-restroom-1.jpg"
+Content-Type: image/jpeg
+
+< /Users/aryanshelke/Documents/GitHub/restroom-finder/restroom-images/pittsburgh-restroom/pittsburgh-restroom-1.jpg
+------WebKitFormBoundary--
+
+### Test 6: Error case - No images provided
+POST http://localhost:3000/api/tagImagesGCV
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary--

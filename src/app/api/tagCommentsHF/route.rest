@@ -1,0 +1,36 @@
+### Test tagCommentsHF with a single comment
+POST http://localhost:3000/api/tagCommentsHF
+Content-Type: application/json
+
+{
+  "comments": ["The restroom was clean and well-maintained, but there was no soap available."]
+}
+
+### Test tagCommentsHF with multiple comments
+POST http://localhost:3000/api/tagCommentsHF
+Content-Type: application/json
+
+{
+  "comments": [
+    "The restroom was clean and well-maintained, but there was no soap available.",
+    "Good lighting and spacious, but the toilet paper was out.",
+    "Very accessible for wheelchair users, but the floor was wet and slippery.",
+    "The restroom smelled fresh and was spotless, but the paper towel dispenser was empty."
+  ]
+}
+
+### Test tagCommentsHF with empty array (should return error)
+POST http://localhost:3000/api/tagCommentsHF
+Content-Type: application/json
+
+{
+  "comments": []
+}
+
+### Test tagCommentsHF with invalid input (should return error)
+POST http://localhost:3000/api/tagCommentsHF
+Content-Type: application/json
+
+{
+  "comments": "This is not an array"
+}
