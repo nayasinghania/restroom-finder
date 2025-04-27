@@ -80,7 +80,7 @@ export default function AddReviewForm({ restroomId }: AddReviewFormProps) {
         accessibility: 0
       });
       setComment("");
-      alert("Review submitted! (This is a demo)");
+      alert("Review submitted!");
     } catch (error) {
       console.error(error);
       alert("An error occurred while adding the review.");
@@ -181,7 +181,7 @@ export default function AddReviewForm({ restroomId }: AddReviewFormProps) {
             <Button
               type="submit"
               className="bg-teal-600 hover:bg-teal-700"
-              disabled={ratings.rating === 0 || !comment.trim() || isSubmitting}
+              disabled={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Submit Review"}
             </Button>

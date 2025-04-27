@@ -173,7 +173,7 @@ export default function RestroomPage({
                       <div>
                         <div className="font-medium">{review.userName}</div>
                         <div className="text-sm text-muted-foreground">
-                          {review.createdAt.toString()}
+                          {review.createdAt.toLocaleString()}
                         </div>
                       </div>
                       <div className="flex items-center mt-2 sm:mt-0">
