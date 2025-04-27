@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     // Combine all comments into a single text
-    const combinedText = comments.join(". ");
+    //const combinedText = comments.join(". ");
 
     // Determine if we're dealing with a single comment
     const isSingleComment = comments.length === 1;
@@ -150,65 +150,65 @@ ${comments.join("\n")}`;
 }
 
 // Function to parse the pros and cons from ChatGPT's response with sections
-function parseProsAndConsWithSections(responseText: string) {
-  const allFeatures = { pros: [] as string[], cons: [] as string[] };
-  const permanentFeatures = { pros: [] as string[], cons: [] as string[] };
+// function parseProsAndConsWithSections(responseText: string) {
+//   const allFeatures = { pros: [] as string[], cons: [] as string[] };
+//   const permanentFeatures = { pros: [] as string[], cons: [] as string[] };
 
-  // Split the response into lines and classify each line
-  const lines = responseText.split("\n");
-  let currentSection = "";
-  let isInPros = false;
-  let isInCons = false;
+//   // Split the response into lines and classify each line
+//   const lines = responseText.split("\n");
+//   let currentSection = "";
+//   let isInPros = false;
+//   let isInCons = false;
 
-  for (let line of lines) {
-    line = line.trim();
+//   for (let line of lines) {
+//     line = line.trim();
 
-    // Detect which section we're in
-    if (line.startsWith("All Features:")) {
-      currentSection = "all";
-      isInPros = false;
-      isInCons = false;
-    } else if (line.startsWith("Permanent Features:")) {
-      currentSection = "permanent";
-      isInPros = false;
-      isInCons = false;
-    } else if (line.startsWith("Pros:")) {
-      isInPros = true;
-      isInCons = false;
-    } else if (line.startsWith("Cons:")) {
-      isInCons = true;
-      isInPros = false;
-    } else {
-      // Add the line to the respective list, removing bullet points and numbers
-      if (line.length > 0) {
-        // Remove bullet points, numbers, and leading/trailing spaces
-        const cleanLine = line
-          .replace(/^[-•*]\s*/, "") // Remove bullet points
-          .replace(/^\d+\.\s*/, "") // Remove numbers like "1.", "2.", etc.
-          .replace(/^\(\d+\)\s*/, "") // Remove numbers like "(1)", "(2)", etc.
-          .trim();
+//     // Detect which section we're in
+//     if (line.startsWith("All Features:")) {
+//       currentSection = "all";
+//       isInPros = false;
+//       isInCons = false;
+//     } else if (line.startsWith("Permanent Features:")) {
+//       currentSection = "permanent";
+//       isInPros = false;
+//       isInCons = false;
+//     } else if (line.startsWith("Pros:")) {
+//       isInPros = true;
+//       isInCons = false;
+//     } else if (line.startsWith("Cons:")) {
+//       isInCons = true;
+//       isInPros = false;
+//     } else {
+//       // Add the line to the respective list, removing bullet points and numbers
+//       if (line.length > 0) {
+//         // Remove bullet points, numbers, and leading/trailing spaces
+//         const cleanLine = line
+//           .replace(/^[-•*]\s*/, "") // Remove bullet points
+//           .replace(/^\d+\.\s*/, "") // Remove numbers like "1.", "2.", etc.
+//           .replace(/^\(\d+\)\s*/, "") // Remove numbers like "(1)", "(2)", etc.
+//           .trim();
 
-        if (cleanLine.length > 0) {
-          if (currentSection === "all") {
-            if (isInPros) {
-              allFeatures.pros.push(cleanLine);
-            } else if (isInCons) {
-              allFeatures.cons.push(cleanLine);
-            }
-          } else if (currentSection === "permanent") {
-            if (isInPros) {
-              permanentFeatures.pros.push(cleanLine);
-            } else if (isInCons) {
-              permanentFeatures.cons.push(cleanLine);
-            }
-          }
-        }
-      }
-    }
-  }
+//         if (cleanLine.length > 0) {
+//           if (currentSection === "all") {
+//             if (isInPros) {
+//               allFeatures.pros.push(cleanLine);
+//             } else if (isInCons) {
+//               allFeatures.cons.push(cleanLine);
+//             }
+//           } else if (currentSection === "permanent") {
+//             if (isInPros) {
+//               permanentFeatures.pros.push(cleanLine);
+//             } else if (isInCons) {
+//               permanentFeatures.cons.push(cleanLine);
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
 
-  return { allFeatures, permanentFeatures };
-}
+//   return { allFeatures, permanentFeatures };
+// }
 
 // Function to parse the pros and cons from ChatGPT's response
 function parseProsAndCons(responseText: string) {
