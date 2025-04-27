@@ -248,7 +248,7 @@ export default function RestroomPage({
             </TabsContent>
 
             <TabsContent value="ai-analysis" className="mt-4">
-              <AIAnalysisCard analysis={restroom.aiAnalysis} />
+              <AIAnalysisCard />
             </TabsContent>
           </Tabs>
         </div>
