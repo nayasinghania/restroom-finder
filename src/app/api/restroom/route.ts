@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
 
     // Calculate averages and counts manually
     const reviewCount = reviewsData.length;
+    console.log(reviewCount);
     const averageRating =
       reviewCount > 0
         ? reviewsData.reduce((sum, review) => sum + review.rating, 0) /
@@ -99,11 +100,10 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const data = await request.json();
-    
-    // Create a new restroom with required fields
+    const data = await req.json();
+    // Kind of a Schema I guess
     const newRestroom = {
       id: uuidv4(), // Generate a UUID
       name: data.name,
