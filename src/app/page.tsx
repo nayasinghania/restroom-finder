@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import RestroomCard from "@/components/restroom-card";
 import MapView from "@/components/map-view";
@@ -33,9 +33,9 @@ export default function HomePage() {
   }, []);
 
   // Handle updates from MapView when viewport changes
-  const handleVisibleRestroomsChange = (newVisibleRestrooms: RestroomSelect[]) => {
+  const handleVisibleRestroomsChange = useCallback((newVisibleRestrooms: RestroomSelect[]) => {
     setVisibleRestrooms(newVisibleRestrooms);
-  };
+  }, []);
 
   return (
     <div className="flex flex-col h-screen">
