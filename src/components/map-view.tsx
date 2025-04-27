@@ -1,17 +1,25 @@
-"use client";
-
 import { useEffect, useState, useCallback } from "react";
-//import { MapPin } from "lucide-react";
-import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { RestroomSelect } from "@/db/schema";
 
+type LatLng = google.maps.LatLngLiteral;
+type RestroomWithPosition = { 
+  restroom: RestroomSelect, 
+  position: LatLng 
+};
+
+interface MapViewProps {
+  restrooms: RestroomSelect[];
+  onVisibleRestroomsChange: (visibleRestrooms: RestroomSelect[]) => void;
+}
 
 async function getUserLocation() {
   return new Promise<GeolocationPosition>((resolve, reject) => {
     
 
     const options = {
-      enableHighAccuracy: false,  // faster, “coarse” location
-      timeout:        30000,      // wait up to 30 s
+      enableHighAccuracy: false,  // faster, "coarse" location
+      timeout:        30000,      // wait up to 30 s
       maximumAge:     600000      // allow a 10 min cached fix
     };
 
@@ -24,50 +32,86 @@ async function getUserLocation() {
   });
 }
 
-
-
-export default function MapView() {
-  const [center, setCenter] = useState({lat: 37.334, lng: -121.875}); // Default to SJSU
+export default function MapView({ restrooms, onVisibleRestroomsChange }: MapViewProps) {
+  const [center, setCenter] = useState({lat: 37.334, lng: -121.875});
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [allMarkers, setAllMarkers] = useState<RestroomWithPosition[]>([]);
+  const [visibleMarkers, setVisibleMarkers] = useState<RestroomWithPosition[]>([]);
 
   const { isLoaded } = useJsApiLoader({
     id: 'annular-primer-458021-q3',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GMAPS_API_KEY || '', 
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GMAPS_API_KEY || '',
   });
 
-  const onLoad = useCallback(function callback(map: google.maps.Map | null) {
-    // This is just an example of getting and using the map instance!!! don't just blindly copy!
-    // const bounds = new window.google.maps.LatLngBounds(center);
-    // if (map) {
-    //   map.fitBounds(bounds);
-      setMap(map);
-      map.setZoom(15);
+  // Geocode restrooms when they change
+  useEffect(() => {
+    if (!isLoaded || restrooms.length === 0) return;
+
+    const geocoder = new window.google.maps.Geocoder();
+    const geocodeRestrooms = async () => {
+      const markers: RestroomWithPosition[] = [];
+      
+      for (const restroom of restrooms) {
+        try {
+          const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+            geocoder.geocode({ address: restroom.address }, (results, status) => {
+              if (status === "OK" && results) {
+                resolve(results);
+              } else {
+                reject(status);
+              }
+            });
+          });
+          
+          if (result[0]) {
+            markers.push({
+              restroom,
+              position: result[0].geometry.location.toJSON()
+            });
+          }
+        } catch (error) {
+          console.error(`Error geocoding ${restroom.address}:`, error);
+        }
+      }
+      
+      setAllMarkers(markers);
+    };
     
+    geocodeRestrooms();
+  }, [isLoaded, restrooms]);
+
+  const onLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
   }, []);
 
+  // Update visible markers when map bounds change
+  const onIdle = useCallback(() => {
+    if (!map) return;
+    
+    const bounds = map.getBounds();
+    if (!bounds) return;
+    
+    const visible = allMarkers.filter(marker => 
+      bounds.contains(new window.google.maps.LatLng(marker.position))
+    );
+    
+    setVisibleMarkers(visible);
+    
+    // Notify parent component about visible restrooms
+    onVisibleRestroomsChange(visible.map(m => m.restroom));
+  }, [map, allMarkers, onVisibleRestroomsChange]);
 
   const onUnmount = useCallback(function callback(map: google.maps.Map): void {
     setMap(null);
   }, []);
 
-  // const onCenterChange = useCallback(function callback(): void {
-  //   const bounds = new window.google.maps.LatLngBounds(center);
-  //   if (map) {
-  //     map.fitBounds(bounds);
-  //     setMap(map);
-  //     map.setZoom(10);
-  //   }
-  // }, [center, map]);
-
-  
   useEffect(() => {
     if (map) {
        map.panTo(center);
        map.setZoom(15);
     }
   }, [center, map]);
-  //const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  
   useEffect(() => {
     async function fetchLocation() {
       try {
@@ -77,7 +121,7 @@ export default function MapView() {
         setCenter({lat: position.coords.latitude, lng: position.coords.longitude});
       } catch (error: any) {
         if (error.code === 3) {
-          // retry without high‐accuracy and a short timeout
+          // retry without high-accuracy and a short timeout
           navigator.geolocation.getCurrentPosition(
             pos => setCenter({lat: pos.coords.latitude, lng: pos.coords.longitude}),
             console.error,
@@ -91,12 +135,10 @@ export default function MapView() {
     fetchLocation();
   }, []);
 
-  // Map CSS
   const containerStyle = {
     width: '100%',
     height: '100%',
   };
-
 
   return isLoaded ? (
     <GoogleMap
@@ -104,14 +146,17 @@ export default function MapView() {
       center={center}
       zoom={15}
       onLoad={onLoad}
+      onIdle={onIdle}
       onUnmount={onUnmount}
-      //onCenterChanged={onCenterChange}
     >
-      {/* Child components, such as markers, info windows, etc. */}
-      <></>
+      {visibleMarkers.map((marker) => (
+        <Marker 
+          key={marker.restroom.id}
+          position={marker.position}
+        />
+      ))}
     </GoogleMap>
   ) : (
-    <></>
-  )
+    <div>Loading Map...</div>
+  );
 }
-
