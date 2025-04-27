@@ -10,17 +10,16 @@ async function getUserLocation() {
     
 
     const options = {
-      enableHighAccuracy: true, // Try to get the best possible results
-      timeout: 10000,         // Maximum time (in milliseconds) to wait for a location
-      maximumAge: 0          // Maximum age (in milliseconds) of a cached position allowed
-                             // 0 means don't use a cached position
+      enableHighAccuracy: false,  // faster, “coarse” location
+      timeout:        30000,      // wait up to 30 s
+      maximumAge:     600000      // allow a 10 min cached fix
     };
 
     if (!navigator.geolocation) {
       reject(new Error("Geolocation is not supported by this browser."));
     } else {
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
       console.log("Getting Location!");
+      return navigator.geolocation.getCurrentPosition(resolve, reject, options);
     }
   });
 }
@@ -28,7 +27,7 @@ async function getUserLocation() {
 
 
 export default function MapView() {
-  const [center, setCenter] = useState({lat: 37.334665328, lng: -121.875329832}); // Default to SJSU
+  const [center, setCenter] = useState({lat: 37.334, lng: -121.875}); // Default to SJSU
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -38,13 +37,13 @@ export default function MapView() {
 
   const onLoad = useCallback(function callback(map: google.maps.Map | null) {
     // This is just an example of getting and using the map instance!!! don't just blindly copy!
-    const bounds = new window.google.maps.LatLngBounds(center);
-    if (map) {
-      map.fitBounds(bounds);
-      map.panTo(center);
+    // const bounds = new window.google.maps.LatLngBounds(center);
+    // if (map) {
+    //   map.fitBounds(bounds);
       setMap(map);
-    }
-  }, [center]);
+      map.setZoom(15);
+    
+  }, []);
 
 
   const onUnmount = useCallback(function callback(map: google.maps.Map): void {
@@ -64,7 +63,7 @@ export default function MapView() {
   useEffect(() => {
     if (map) {
        map.panTo(center);
-       map.setZoom(10);
+       map.setZoom(15);
     }
   }, [center, map]);
   //const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -73,9 +72,20 @@ export default function MapView() {
     async function fetchLocation() {
       try {
         const position = await getUserLocation();
+        console.log({"lat": position.coords.latitude});
+        console.log({"lng": position.coords.longitude});
         setCenter({lat: position.coords.latitude, lng: position.coords.longitude});
-      } catch (error) {
+      } catch (error: any) {
+        if (error.code === 3) {
+          // retry without high‐accuracy and a short timeout
+          navigator.geolocation.getCurrentPosition(
+            pos => setCenter({lat: pos.coords.latitude, lng: pos.coords.longitude}),
+            console.error,
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+          );
+        } else {
         console.error('Error getting location:', error);
+        }
       }
     }
     fetchLocation();
@@ -92,7 +102,7 @@ export default function MapView() {
     <GoogleMap
       mapContainerStyle={containerStyle}
       center={center}
-      zoom={10}
+      zoom={15}
       onLoad={onLoad}
       onUnmount={onUnmount}
       //onCenterChanged={onCenterChange}
