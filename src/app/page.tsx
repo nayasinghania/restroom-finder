@@ -1,10 +1,33 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import RestroomCard from "@/components/restroom-card";
 import MapView from "@/components/map-view";
 import MenstrualProductFilter from "@/components/menstrual-product-filter";
 import Header from "@/components/header";
+import { RestroomSelect } from "@/db/schema";
 
 export default function HomePage() {
+  const [restrooms, setRestrooms] = useState([]);
+
+  useEffect(() => {
+    async function fetchRestrooms() {
+      try {
+        const response = await fetch("/api/restrooms"); // Adjust the API endpoint as needed
+        if (!response.ok) {
+          throw new Error("Failed to fetch restrooms");
+        }
+        const data = await response.json();
+        setRestrooms(data);
+      } catch (error) {
+        console.error("Error fetching restrooms:", error);
+      }
+    }
+
+    fetchRestrooms();
+  }, []);
+
   return (
     <main className="container mx-auto px-4 py-6">
       <Header />
@@ -27,8 +50,8 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-2">
-            {[1, 2, 3, 4, 5].map((id) => (
-              <RestroomCard key={id} id={id} />
+            {restrooms.map((restroom: RestroomSelect) => (
+              <RestroomCard key={restroom.id} id={restroom.id} />
             ))}
           </div>
         </div>
