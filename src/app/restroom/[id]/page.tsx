@@ -134,7 +134,7 @@ export default function RestroomPage({
                   className="relative h-48 rounded-lg overflow-hidden border"
                 >
                   <Image
-                    src={image}
+                    src={`/${image}`}
                     alt={`${restroom.name} image ${index + 1}`}
                     fill
                     className="object-cover"
