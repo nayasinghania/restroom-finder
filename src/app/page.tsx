@@ -23,7 +23,7 @@ export default function HomePage() {
         const data = await response.json();
         setAllRestrooms(data);
         // Initially set all restrooms as visible until map filters them
-        setVisibleRestrooms(data);
+        //setVisibleRestrooms(data);
       } catch (error) {
         console.error("Error fetching restrooms:", error);
       }
