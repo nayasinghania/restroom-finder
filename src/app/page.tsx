@@ -42,13 +42,13 @@ export default function HomePage() {
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 flex-grow">
         <div className="p-4 overflow-auto">
-          <h2 className="text-2xl font-bold mb-4">Nearby Restrooms</h2>
-          <div className="flex space-x-2 mb-4">
-            <MenstrualProductFilter />
-            <Button variant="outline">Filter</Button>
-            <Button variant="outline">Highest Rated</Button>
-            <Button variant="outline">Nearest</Button>
-            <Button variant="outline">Most Reviewed</Button>
+          <h2 className="text-2xl font-bold mb-4 ">Nearby Restrooms</h2>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+          <MenstrualProductFilter />
+            <Button variant="outline" className="text-xs">Filter</Button>
+            <Button variant="outline" className="text-xs">Highest Rated</Button>
+            <Button variant="outline" className="text-xs">Nearest</Button>
+            <Button variant="outline" className="text-xs">Most Reviewed</Button>
           </div>
           
           {visibleRestrooms.length > 0 ? (
@@ -64,7 +64,7 @@ export default function HomePage() {
           )}
         </div>
         
-        <div className="bg-gray-100">
+        <div className="bg-gray-100 mr-2">
           <MapView 
             restrooms={allRestrooms} 
             onVisibleRestroomsChange={handleVisibleRestroomsChange}

@@ -6,7 +6,7 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export default function Header() {
   return (
-    <header className="flex flex-col sm:flex-row items-center justify-between mb-8 px-4 sm:px-8">
+    <header className="flex flex-col sm:flex-row items-center justify-between mb-8 mx-4">
       <div className="flex items-center mb-4 sm:mb-0">
         <h1 className="text-2xl font-bold mr-2 whitespace-nowrap">
           RestroomFinder
