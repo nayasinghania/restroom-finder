@@ -1,11 +1,9 @@
 "use client";
 
 import type React from "react";
-import Image from "next/image";
-
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Upload, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,29 +19,55 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AddRestroomPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    hours: "",
+    type: "",
+    description: "",
+    features: [] as string[],
+    menstrualProducts: {
+      available: false,
+      dispenserType: "",
+      status: "",
+      notes: "",
+    },
+  });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      // In a real app, you would upload these to your server/cloud storage
-      // For demo purposes, we'll just create object URLs
-      const newImages = Array.from(e.target.files).map((file) =>
-        URL.createObjectURL(file),
-      );
-      setImages([...images, ...newImages]);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/restroom", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add restroom");
+      }
+
+      alert("Restroom added successfully!");
+      // Reset form or redirect as needed
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while adding the restroom.");
+    } finally {
       setIsSubmitting(false);
-      alert("Restroom added successfully! (This is a demo)");
-      // In a real app, you would redirect to the new restroom page
-    }, 1500);
+    }
+  };
+
+  const handleFeatureChange = (feature: string) => {
+    setFormData((prev) => {
+      const features = prev.features.includes(feature)
+        ? prev.features.filter((f) => f !== feature)
+        : [...prev.features, feature];
+      return { ...prev, features };
+    });
   };
 
   return (
@@ -74,6 +98,10 @@ export default function AddRestroomPage() {
                   id="name"
                   placeholder="e.g. Central Park Public Restroom"
                   required
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                 />
               </div>
 
@@ -85,6 +113,10 @@ export default function AddRestroomPage() {
                     placeholder="Full address"
                     required
                     className="flex-1"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
                   />
                   <Button type="button" variant="outline" className="ml-2">
                     <MapPin className="h-4 w-4 mr-2" />
@@ -96,13 +128,24 @@ export default function AddRestroomPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="hours">Opening Hours</Label>
-                  <Input id="hours" placeholder="e.g. 7:00 AM - 10:00 PM" />
+                  <Input
+                    id="hours"
+                    placeholder="e.g. 7:00 AM - 10:00 PM"
+                    value={formData.hours}
+                    onChange={(e) =>
+                      setFormData({ ...formData, hours: e.target.value })
+                    }
+                  />
                 </div>
                 <div>
                   <Label htmlFor="type">Restroom Type</Label>
                   <select
                     id="type"
                     className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
                   >
                     <option value="">Select type</option>
                     <option value="public">Public</option>
@@ -120,6 +163,10 @@ export default function AddRestroomPage() {
                   id="description"
                   placeholder="Provide any additional details about this restroom..."
                   rows={3}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                 />
               </div>
             </CardContent>
@@ -150,7 +197,11 @@ export default function AddRestroomPage() {
                   "Menstrual Products",
                 ].map((feature) => (
                   <div key={feature} className="flex items-center space-x-2">
-                    <Checkbox id={feature.replace(/\s+/g, "-").toLowerCase()} />
+                    <Checkbox
+                      id={feature.replace(/\s+/g, "-").toLowerCase()}
+                      checked={formData.features.includes(feature)}
+                      onChange={() => handleFeatureChange(feature)}
+                    />
                     <Label
                       htmlFor={feature.replace(/\s+/g, "-").toLowerCase()}
                       className="text-sm font-normal"
@@ -172,7 +223,19 @@ export default function AddRestroomPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start space-x-2">
-                <Checkbox id="menstrual-products" />
+                <Checkbox
+                  id="menstrual-products"
+                  checked={formData.menstrualProducts.available}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      menstrualProducts: {
+                        ...formData.menstrualProducts,
+                        available: (e.target as HTMLInputElement).checked,
+                      },
+                    })
+                  }
+                />
                 <div>
                   <Label htmlFor="menstrual-products" className="font-medium">
                     This restroom has menstrual products
@@ -186,6 +249,16 @@ export default function AddRestroomPage() {
                   <select
                     id="product-type"
                     className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
+                    value={formData.menstrualProducts.dispenserType}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        menstrualProducts: {
+                          ...formData.menstrualProducts,
+                          dispenserType: e.target.value,
+                        },
+                      })
+                    }
                   >
                     <option value="">Select type</option>
                     <option value="free">Free dispensers</option>
@@ -199,6 +272,16 @@ export default function AddRestroomPage() {
                   <select
                     id="product-status"
                     className="w-full h-10 rounded-md border border-input bg-background px-3 py-2"
+                    value={formData.menstrualProducts.status}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        menstrualProducts: {
+                          ...formData.menstrualProducts,
+                          status: e.target.value,
+                        },
+                      })
+                    }
                   >
                     <option value="">Select status</option>
                     <option value="well-stocked">Well stocked</option>
@@ -210,127 +293,22 @@ export default function AddRestroomPage() {
               </div>
 
               <div>
-                <Label className="block mb-2">Dispenser Photos</Label>
-                <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center">
-                  <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Upload photos of the menstrual product dispensers
-                  </p>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    id="dispenser-image-upload"
-                  />
-                  <Label htmlFor="dispenser-image-upload">
-                    <Button type="button" variant="outline" size="sm">
-                      Select Images
-                    </Button>
-                  </Label>
-                </div>
-              </div>
-
-              <div>
                 <Label htmlFor="product-notes">Additional Notes</Label>
                 <Textarea
                   id="product-notes"
                   placeholder="Any additional information about the menstrual products (location in the restroom, condition, etc.)"
                   rows={2}
+                  value={formData.menstrualProducts.notes}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      menstrualProducts: {
+                        ...formData.menstrualProducts,
+                        notes: e.target.value,
+                      },
+                    })
+                  }
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Photos</CardTitle>
-              <CardDescription>
-                Upload photos of the restroom to help others
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Drag and drop images here or click to browse
-                  </p>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    id="image-upload"
-                    onChange={handleImageUpload}
-                  />
-                  <Label htmlFor="image-upload">
-                    <Button type="button" variant="outline" className="mt-2">
-                      Select Images
-                    </Button>
-                  </Label>
-                </div>
-
-                {images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {images.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative h-24 rounded-md overflow-hidden"
-                      >
-                        <Image
-                          src={image || "/placeholder.svg"}
-                          alt={`Uploaded image ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          layout="fill"
-                          objectFit="cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center">
-                <Sparkles className="h-5 w-5 text-teal-500 mr-2" />
-                <CardTitle>AI-Enhanced Features</CardTitle>
-              </div>
-              <CardDescription>
-                Our AI will analyze your photos and reviews to extract features
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-start space-x-2">
-                  <Checkbox id="ai-image-analysis" defaultChecked />
-                  <div>
-                    <Label htmlFor="ai-image-analysis" className="font-medium">
-                      Enable AI Image Analysis
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Our computer vision system will detect features like
-                      cleanliness, accessibility features, and amenities from
-                      your photos.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-2">
-                  <Checkbox id="ai-review-analysis" defaultChecked />
-                  <div>
-                    <Label htmlFor="ai-review-analysis" className="font-medium">
-                      Enable AI Review Analysis
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Our NLP system will analyze reviews to extract pros, cons,
-                      and key features mentioned by users.
-                    </p>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
