@@ -7,7 +7,7 @@ import {
 import { db } from "../../../db"; // Adjust the path to your database instance
 import { v4 as uuidv4 } from "uuid";
 
-export async function seedDatabase() {
+async function seedDatabase() {
   // Seed restrooms
   const restroomEntries = [
     {
