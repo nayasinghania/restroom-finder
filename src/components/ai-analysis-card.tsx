@@ -1,15 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, ThumbsUp, ThumbsDown, Camera } from "lucide-react";
 
-interface AIAnalysisProps {
-  analysis: {
-    pros: string[];
-    cons: string[];
-    imageFeatures: string[];
-  };
-}
+// interface AIAnalysisProps {
+//   analysis: {
+//     pros: string[];
+//     cons: string[];
+//     imageFeatures: string[];
+//   };
+// }
 
-export default function AIAnalysisCard({ analysis }: AIAnalysisProps) {
+export default function AIAnalysisCard() {
+  const analysis = {
+    pros: ["Clean", "Well-maintained", "Good lighting", "Accessible"],
+    cons: ["Can be busy", "Occasional maintenance issues", "Limited stalls"],
+    imageFeatures: [
+      "Modern fixtures",
+      "Touchless faucets",
+      "ADA compliant",
+      "Good lighting",
+    ],
+  };
   return (
     <Card>
       <CardContent className="p-6">
